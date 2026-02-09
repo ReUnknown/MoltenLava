@@ -1,0 +1,242 @@
+/* --- Reset & Base Styles --- */
+:root {
+    --bg-dark: #0f0f11;
+    --bg-card: #18181b;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --accent-orange: #ff5e3a; /* Matching the flame color */
+    --accent-glow: rgba(255, 94, 58, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+/* --- Navigation --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 5%;
+    background: rgba(15, 15, 17, 0.95);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #27272a;
+}
+
+/* Logo Styling - Matching your Image */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.flame-icon {
+    width: 32px;
+    height: 32px;
+    fill: var(--accent-orange);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: white;
+}
+
+/* The thin text style from the image */
+.logo-thin {
+    font-weight: 200; /* Very thin */
+    color: #e4e4e7;
+    margin-left: 2px;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-left: 2rem;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: white;
+}
+
+/* --- Hero Section --- */
+.hero {
+    text-align: center;
+    padding: 6rem 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #fff, #a1a1aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.hero-sub {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+/* --- Grid Section --- */
+.apps-container {
+    padding: 2rem 10%;
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--accent-orange);
+    padding-left: 1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* --- Cards --- */
+.card {
+    background: var(--bg-card);
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 2rem;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 250px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-orange);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.card-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--text-main);
+}
+
+.card-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.card-title-thin {
+    font-weight: 200;
+    opacity: 0.9;
+}
+
+.card-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.tag {
+    font-size: 0.75rem;
+    background: #27272a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-muted);
+}
+
+.btn-card {
+    color: var(--accent-orange);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-card:hover {
+    text-decoration: underline;
+}
+
+/* Coming Soon Placeholder */
+.coming-soon {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.dashed-border {
+    width: 100%;
+    height: 100%;
+    border: 2px dashed #27272a;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #52525b;
+}
+
+.card {
+    position: relative;
+    overflow: hidden; /* Keeps the glow inside the card */
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        rgba(255, 94, 58, 0.06), 
+        transparent 40%
+    );
+    z-index: 0;
+    pointer-events: none; /* Let clicks pass through */
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* Ensure content stays above the glow */
+.card-header, .card-desc, .card-footer {
+    position: relative;
+    z-index: 1;
+}
