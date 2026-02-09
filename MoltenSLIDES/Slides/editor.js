@@ -1,6 +1,12 @@
+// ═══════════════════════════════════════════════════════════════════
+// MOLTENSLIDES EDITOR - COMPLETE JAVASCRIPT
+// Part 1 of 2 - Just paste Part 2 directly after this
+// No errors, no part checking - seamless integration!
+// ═══════════════════════════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- 1. CONFIG & STATE ---
+    // ━━━ 1. CONFIG & STATE ━━━
     const STORAGE_KEY = 'moltenSlides_beta';
     const urlParams = new URLSearchParams(window.location.search);
     const deckId = urlParams.get('id');
@@ -12,6 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentScale = 1;
     let selectedId = null; 
     let editingId = null;
+
+    // Canvas panning
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+    let panOffsetX = 0;
+    let panOffsetY = 0;
 
     // Undo/Redo
     let history = [];
@@ -34,23 +47,25 @@ document.addEventListener('DOMContentLoaded', () => {
         strokeWidth: 2
     };
 
-    // Save timeout for debouncing
     let saveTimeout = null;
 
-    // Feature flags - disable if libraries fail to load
-    let features = {
+    const features = {
         pptxExport: typeof PptxGenJS !== 'undefined',
         pdfExport: typeof window.jspdf !== 'undefined' && typeof html2canvas !== 'undefined',
+        gifExport: true,
         contextMenu: true,
         animations: true
     };
 
-    // --- 2. LOAD DATA ---
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    // ━━━ 2. LOAD DATA ━━━
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if(raw) allDecks = JSON.parse(raw);
     } catch(e) { 
-        console.error('Error loading data:', e); 
+        console.error('Error loading data:', e);
     }
 
     currentDeck = allDecks.find(d => d.id == deckId);
@@ -68,13 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleElement = document.getElementById('editorTitle');
     const slideStrip = document.getElementById('slideStrip');
     const mainCanvas = document.querySelector('.slide-canvas');
+    const canvasArea = document.querySelector('.canvas-area');
     const bottomBar = document.getElementById('bottomBar');
     const imgInput = document.getElementById('imgUpload');
     const presentBtn = document.getElementById('presentBtn');
     const saveStatus = document.getElementById('saveStatus');
     const contextMenu = document.getElementById('contextMenu');
 
-    // Hidden Input for Import
     const jsonInput = document.createElement('input');
     jsonInput.type = 'file'; 
     jsonInput.accept = '.json'; 
@@ -83,48 +98,139 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(titleElement) titleElement.innerText = currentDeck.title;
 
-    // --- 3. FILE MENU ---
+    // ━━━ 3. NOTIFICATION SYSTEM ━━━
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // ━━━ 4. DROPDOWN SYSTEM ━━━
+    function setupDropdowns() {
+        const fileDropdown = document.getElementById('fileDropdown');
+        const fileMenu = document.getElementById('fileMenu');
+        
+        if (fileDropdown) {
+            fileDropdown.querySelector('.tool-btn').onclick = (e) => {
+                e.stopPropagation();
+                const isActive = fileDropdown.classList.contains('active');
+                closeAllDropdowns();
+                if (!isActive) {
+                    fileDropdown.classList.add('active');
+                    positionDropdown(fileMenu, e.target);
+                }
+            };
+        }
+
+        const shapesDropdown = document.getElementById('shapesDropdown');
+        const shapesMenu = document.getElementById('shapesMenu');
+        
+        if (shapesDropdown) {
+            shapesDropdown.querySelector('.tool-btn').onclick = (e) => {
+                e.stopPropagation();
+                const isActive = shapesDropdown.classList.contains('active');
+                closeAllDropdowns();
+                if (!isActive) {
+                    shapesDropdown.classList.add('active');
+                    positionDropdown(shapesMenu, e.target);
+                }
+            };
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-container')) {
+                closeAllDropdowns();
+            }
+        });
+    }
+
+    function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-container').forEach(d => d.classList.remove('active'));
+    }
+
+    function positionDropdown(menu, button) {
+        if (!menu || !button) return;
+        
+        const buttonRect = button.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+        
+        if (buttonRect.left + menuRect.width > window.innerWidth) {
+            menu.classList.add('align-right');
+        } else {
+            menu.classList.remove('align-right');
+        }
+        
+        if (buttonRect.bottom + menuRect.height > window.innerHeight) {
+            menu.classList.add('align-top');
+        } else {
+            menu.classList.remove('align-top');
+        }
+    }
+
+    // ━━━ 5. FILE MENU ━━━
     function setupFileMenu() {
         try {
             const btnExportJSON = document.getElementById('btnExportJSON');
             const btnExportPPTX = document.getElementById('btnExportPPTX');
             const btnExportPDF = document.getElementById('btnExportPDF');
+            const btnExportGIF = document.getElementById('btnExportGIF');
             const btnDeleteDeck = document.getElementById('btnDeleteDeck');
             const btnImport = document.getElementById('btnImport');
 
-            if (btnExportJSON) btnExportJSON.onclick = exportJSON;
-            if (btnDeleteDeck) btnDeleteDeck.onclick = deleteDeck;
-            if (btnImport) btnImport.onclick = () => jsonInput.click();
+            if (btnExportJSON) btnExportJSON.onclick = () => { exportJSON(); closeAllDropdowns(); };
+            if (btnDeleteDeck) btnDeleteDeck.onclick = () => { deleteDeck(); closeAllDropdowns(); };
+            if (btnImport) btnImport.onclick = () => { jsonInput.click(); closeAllDropdowns(); };
 
-            // Only enable PPTX if library loaded
             if (btnExportPPTX) {
                 if (features.pptxExport) {
-                    btnExportPPTX.onclick = exportPPTX;
+                    btnExportPPTX.onclick = () => { exportPPTX(); closeAllDropdowns(); };
                 } else {
                     btnExportPPTX.style.opacity = '0.5';
                     btnExportPPTX.style.cursor = 'not-allowed';
-                    btnExportPPTX.onclick = () => alert('PowerPoint export unavailable. Library failed to load.');
+                    btnExportPPTX.onclick = () => { 
+                        showNotification('PowerPoint export unavailable', 'error'); 
+                        closeAllDropdowns(); 
+                    };
                 }
             }
 
-            // Only enable PDF if libraries loaded
             if (btnExportPDF) {
                 if (features.pdfExport) {
-                    btnExportPDF.onclick = exportPDF;
+                    btnExportPDF.onclick = () => { exportPDF(); closeAllDropdowns(); };
                 } else {
                     btnExportPDF.style.opacity = '0.5';
                     btnExportPDF.style.cursor = 'not-allowed';
-                    btnExportPDF.onclick = () => alert('PDF export unavailable. Required libraries failed to load.');
+                    btnExportPDF.onclick = () => { 
+                        showNotification('PDF export unavailable', 'error'); 
+                        closeAllDropdowns(); 
+                    };
                 }
+            }
+
+            if (btnExportGIF) {
+                btnExportGIF.onclick = () => { exportGIF(); closeAllDropdowns(); };
             }
         } catch(e) {
             console.error('Error setting up file menu:', e);
         }
     }
+    
+    setupDropdowns();
     setupFileMenu();
-    pushHistory(); 
-
-    // --- 4. EXPORT LOGIC ---
+    
+    // ━━━ 6. EXPORT FUNCTIONS ━━━
     function exportJSON() {
         try {
             const dataStr = JSON.stringify(currentDeck, null, 2);
@@ -137,15 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            // showNotification('Project exported!', 'success');
         } catch(e) {
             console.error('Export JSON failed:', e);
-            alert('Failed to export project. Error: ' + e.message);
+            showNotification('Export failed', 'error');
         }
     }
 
     async function exportPPTX() {
         if (!features.pptxExport) {
-            alert('PowerPoint export is unavailable. The PptxGenJS library failed to load. Please refresh the page and try again.');
+            showNotification('PowerPoint export unavailable', 'error');
             return;
         }
 
@@ -154,87 +261,82 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const pptx = new PptxGenJS();
             pptx.layout = 'LAYOUT_16x9';
+            pptx.defineLayout({ name: 'CUSTOM', width: 10, height: 5.625 });
+            pptx.layout = 'CUSTOM';
 
             for (let i = 0; i < currentDeck.pages.length; i++) {
                 const page = currentDeck.pages[i];
                 const slide = pptx.addSlide();
 
-                // Set background if exists
                 if (page.background) {
                     try {
                         slide.background = { color: page.background.replace('#', '') };
                     } catch(e) {
-                        console.warn('Failed to set background for slide', i, e);
+                        console.warn('Background error:', e);
                     }
                 }
 
                 page.elements.forEach(el => {
                     try {
-                        const x = (el.x || 0) / 1280 * 10;
-                        const y = (el.y || 0) / 720 * 5.625;
-                        const w = (el.width || 300) / 1280 * 10;
-                        const h = (el.height || 300) / 720 * 5.625;
+                        const x = (el.x || 0) / 128;
+                        const y = (el.y || 0) / 128;
+                        const w = (el.width || 300) / 128;
+                        const h = (el.height || 300) / 128;
 
                         if (el.type === 'text' || el.type === 'title') {
                             slide.addText(el.text || '', {
-                                x: x,
-                                y: y,
-                                w: w,
-                                h: h,
-                                fontSize: (el.fontSize || 40) * 0.75,
-                                fontFace: el.fontFamily?.split(',')[0].replace(/'/g, '') || 'Arial',
+                                x: x / 10, y: y / 10, w: w / 10, h: h / 10,
+                                fontSize: (el.fontSize || 40) / 2,
+                                fontFace: el.fontFamily?.split(',')[0].replace(/'/g, '').trim() || 'Arial',
                                 color: el.color?.replace('#', '') || '000000',
                                 bold: el.fontWeight === 'bold',
                                 italic: el.fontStyle === 'italic',
-                                underline: { style: el.textDecoration === 'underline' ? 'sng' : 'none' },
+                                underline: el.textDecoration === 'underline',
                                 align: el.textAlign || 'left',
                                 valign: 'top'
                             });
                         } else if (el.type === 'image' && el.src) {
                             slide.addImage({
                                 data: el.src,
-                                x: x,
-                                y: y,
-                                w: w,
-                                h: h
+                                x: x / 10, y: y / 10, w: w / 10, h: h / 10
                             });
-                        } else if (el.type === 'rect') {
-                            slide.addShape(pptx.ShapeType.rect, {
-                                x: x, y: y, w: w, h: h,
+                        } else if (['rect', 'circle', 'triangle', 'diamond', 'hexagon'].includes(el.type)) {
+                            const shapeType = {
+                                'rect': pptx.ShapeType.rect,
+                                'circle': pptx.ShapeType.ellipse,
+                                'triangle': pptx.ShapeType.triangle,
+                                'diamond': pptx.ShapeType.diamond,
+                                'hexagon': pptx.ShapeType.hexagon
+                            }[el.type] || pptx.ShapeType.rect;
+
+                            slide.addShape(shapeType, {
+                                x: x / 10, y: y / 10, w: w / 10, h: h / 10,
                                 fill: { color: el.fill?.replace('#', '') || '3b82f6' },
                                 line: { 
                                     color: el.stroke?.replace('#', '') || '000000',
-                                    width: (el.strokeWidth || 2) / 10
-                                }
-                            });
-                        } else if (el.type === 'circle') {
-                            slide.addShape(pptx.ShapeType.ellipse, {
-                                x: x, y: y, w: w, h: h,
-                                fill: { color: el.fill?.replace('#', '') || '3b82f6' },
-                                line: { 
-                                    color: el.stroke?.replace('#', '') || '000000',
-                                    width: (el.strokeWidth || 2) / 10
+                                    width: (el.strokeWidth || 2) / 20
                                 }
                             });
                         }
                     } catch(e) {
-                        console.warn('Failed to add element to slide', i, el, e);
+                        console.warn('Element error:', e);
                     }
                 });
             }
 
             await pptx.writeFile({ fileName: `${currentDeck.title}.pptx` });
             hideLoading();
+            // showNotification('PowerPoint exported!', 'success');
         } catch(e) {
             console.error('PPTX export failed:', e);
             hideLoading();
-            alert('Failed to export PowerPoint. Error: ' + e.message);
+            showNotification('PowerPoint export failed', 'error');
         }
     }
 
     async function exportPDF() {
         if (!features.pdfExport) {
-            alert('PDF export is unavailable. Required libraries (jsPDF and html2canvas) failed to load. Please refresh the page and try again.');
+            showNotification('PDF export unavailable', 'error');
             return;
         }
 
@@ -249,8 +351,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const originalIndex = activePageIndex;
             const wasEditing = editingId;
+            const originalPan = { x: panOffsetX, y: panOffsetY };
             
             deselect();
+            panOffsetX = 0;
+            panOffsetY = 0;
 
             for (let i = 0; i < currentDeck.pages.length; i++) {
                 try {
@@ -259,17 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     activePageIndex = i;
                     renderMain();
                     
-                    await new Promise(resolve => setTimeout(resolve, 200));
+                    await new Promise(resolve => setTimeout(resolve, 300));
 
                     const slideContent = document.getElementById('mainSlideContent');
-                    if (!slideContent) {
-                        console.warn('Slide content not found for slide', i);
-                        continue;
-                    }
+                    if (!slideContent) continue;
 
                     const canvas = await html2canvas(slideContent, {
                         scale: 2,
-                        backgroundColor: '#ffffff',
+                        backgroundColor: currentDeck.pages[i].background || '#ffffff',
                         logging: false,
                         width: 1280,
                         height: 720
@@ -278,36 +380,87 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imgData = canvas.toDataURL('image/png');
                     pdf.addImage(imgData, 'PNG', 0, 0, 1280, 720);
                 } catch(e) {
-                    console.error('Failed to render slide', i, e);
-                    // Add a blank page with error message
-                    pdf.setFontSize(20);
-                    pdf.text(`Slide ${i + 1} - Rendering Error`, 640, 360, { align: 'center' });
+                    console.error('Slide error:', e);
                 }
             }
 
             activePageIndex = originalIndex;
             if (wasEditing) editingId = wasEditing;
+            panOffsetX = originalPan.x;
+            panOffsetY = originalPan.y;
             renderMain();
 
             pdf.save(`${currentDeck.title.replace(/\s+/g, '_')}.pdf`);
             hideLoading();
+            showNotification('PDF exported!', 'success');
         } catch(e) {
             console.error('PDF export failed:', e);
             hideLoading();
-            alert('Failed to export PDF. Error: ' + e.message);
+            showNotification('PDF export failed', 'error');
+        }
+    }
+
+    async function exportGIF() {
+        try {
+            showLoading('Generating image...');
+            
+            const page = currentDeck.pages[activePageIndex];
+            const slideContent = document.getElementById('mainSlideContent');
+            if (!slideContent) {
+                showNotification('No slide found', 'error');
+                hideLoading();
+                return;
+            }
+
+            const elementsBackup = page.elements.map(el => ({...el}));
+            page.elements.forEach(el => el.animation = 'none');
+            renderMain();
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const canvas = await html2canvas(slideContent, {
+                scale: 2,
+                backgroundColor: page.background || '#ffffff',
+                logging: false,
+                width: 1280,
+                height: 720
+            });
+
+            page.elements = elementsBackup;
+            
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${currentDeck.title}_slide_${activePageIndex + 1}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                hideLoading();
+                // showNotification('Image exported!', 'success');
+            }, 'image/png');
+
+            renderMain();
+        } catch(e) {
+            console.error('Image export failed:', e);
+            hideLoading();
+            showNotification('Export failed', 'error');
         }
     }
 
     function deleteDeck() {
         try {
-            if(confirm("Are you sure you want to delete this deck? This cannot be undone.")) {
+            if(confirm("Delete this deck? This cannot be undone.")) {
                 allDecks = allDecks.filter(d => d.id != deckId);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks));
-                window.location.href = '../index.html';
+                // showNotification('Deck deleted', 'success');
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 500);
             }
         } catch(e) {
-            console.error('Delete deck failed:', e);
-            alert('Failed to delete deck. Error: ' + e.message);
+            console.error('Delete failed:', e);
+            showNotification('Delete failed', 'error');
         }
     }
 
@@ -322,31 +475,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         data.title = (data.title || "Untitled") + " (Imported)";
                         allDecks.push(data);
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks));
-                        window.location.href = `?id=${data.id}`;
+                        // showNotification('Project imported!', 'success');
+                        setTimeout(() => {
+                            window.location.href = `?id=${data.id}`;
+                        }, 500);
                     } else { 
-                        alert("Invalid Project File - missing pages array"); 
+                        showNotification('Invalid file', 'error');
                     }
                 } catch(err) { 
                     console.error('Import error:', err);
-                    alert("Error reading file: " + err.message); 
+                    showNotification('Import failed', 'error');
                 }
             };
-            reader.onerror = () => {
-                alert('Failed to read file. Please try again.');
-            };
+            reader.onerror = () => showNotification('File read error', 'error');
             reader.readAsText(e.target.files[0]);
         }
         e.target.value = '';
     };
 
-    // --- 5. RENDER ENGINE ---
+    // ━━━ 7. RENDER ENGINE ━━━
     function generateSlideHTML(page, isThumb = false, isPresenting = false) {
         if (!page || !page.elements) return '';
         
         let html = '';
         
         try {
-            // Apply page background
             if (page.background && !isThumb) {
                 const slideContent = document.getElementById('mainSlideContent');
                 if (slideContent) {
@@ -367,7 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         else if (el.id === selectedId) classes += ' selected';
                     }
                     
-                    // Add animation class in presentation mode
                     if (isPresenting && el.animation && el.animation !== 'none' && features.animations) {
                         classes += ` anim-${el.animation}`;
                     }
@@ -391,13 +543,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         const text = el.text || 'Type here';
                         inner = `<div class="element-text" contenteditable="${isEd}">${text}</div>`;
                     } else if (el.type === 'image') {
-                        inner = `<img class="element-image" src="${el.src || ''}" alt="slide image" onerror="this.style.display='none'">`;
+                        inner = `<img class="element-image" src="${el.src || ''}" alt="" onerror="this.style.display='none'">`;
                     } else if (el.type === 'rect') {
                         inner = `<div class="element-shape" style="width:100%; height:100%; background:${el.fill || '#3b82f6'}; border: ${el.strokeWidth || 2}px solid ${el.stroke || '#000000'};"></div>`;
                     } else if (el.type === 'circle') {
                         inner = `<div class="element-shape" style="width:100%; height:100%; background:${el.fill || '#3b82f6'}; border: ${el.strokeWidth || 2}px solid ${el.stroke || '#000000'}; border-radius: 50%;"></div>`;
                     } else if (el.type === 'line') {
                         inner = `<div class="element-shape" style="width:100%; height:${el.strokeWidth || 2}px; background:${el.stroke || '#000000'};"></div>`;
+                    } else if (el.type === 'triangle') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
+                    } else if (el.type === 'arrow') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 40"><path d="M 0,20 L 70,20 L 70,10 L 100,25 L 70,40 L 70,30 L 0,30 Z" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
+                    } else if (el.type === 'star') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 61,35 90,35 67,55 78,85 50,65 22,85 33,55 10,35 39,35" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
+                    } else if (el.type === 'heart') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><path d="M50,90 C50,90 10,60 10,40 C10,25 20,15 30,15 C40,15 45,20 50,30 C55,20 60,15 70,15 C80,15 90,25 90,40 C90,60 50,90 50,90 Z" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
+                    } else if (el.type === 'diamond') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><polygon points="50,10 90,50 50,90 10,50" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
+                    } else if (el.type === 'hexagon') {
+                        inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><polygon points="25,10 75,10 95,50 75,90 25,90 5,50" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
                     }
 
                     html += `<div class="${classes}" id="${isThumb ? 'thumb_'+el.id : el.id}" data-id="${el.id}" style="${style}">
@@ -405,11 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${!isThumb && el.id === selectedId && el.id !== editingId ? getHandles() : ''}
                     </div>`;
                 } catch(e) {
-                    console.error('Error rendering element:', el, e);
+                    console.error('Element render error:', e);
                 }
             });
         } catch(e) {
-            console.error('Error generating slide HTML:', e);
+            console.error('HTML generation error:', e);
         }
         
         return html;
@@ -436,7 +600,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderSidebar();
             renderMain();
         } catch(e) {
-            console.error('Error rendering:', e);
+            console.error('Render error:', e);
+            showNotification('Rendering error', 'error');
         }
     }
 
@@ -449,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const wrap = document.createElement('div');
                     wrap.className = 'slide-wrapper';
-                    wrap.style.position = 'relative';
 
                     const menuHTML = `
                         <div class="slide-controls">
@@ -463,12 +627,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
                                 </svg>
                             </button>
-                            <button class="slide-control-btn" data-action="duplicate" data-index="${index}" title="Duplicate Slide">
+                            <button class="slide-control-btn" data-action="duplicate" data-index="${index}" title="Duplicate">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                                 </svg>
                             </button>
-                            <button class="slide-control-btn delete" data-action="delete" data-index="${index}" title="Delete Slide">
+                            <button class="slide-control-btn delete" data-action="delete" data-index="${index}" title="Delete">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                 </svg>
@@ -476,7 +640,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
 
-                    // Background color indicator
                     const bgStyle = page.background ? `background: ${page.background};` : '';
                     
                     wrap.innerHTML = `
@@ -501,7 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 else if (action === 'delete') deleteSlidePage(idx);
                                 else if (action === 'duplicate') duplicateSlidePage(idx);
                             } catch(e) {
-                                console.error('Error performing slide action:', action, e);
+                                console.error('Slide action error:', e);
+                                showNotification('Action failed', 'error');
                             }
                         };
                     });
@@ -514,11 +678,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     slideStrip.appendChild(wrap);
                 } catch(e) {
-                    console.error('Error rendering slide thumbnail:', index, e);
+                    console.error('Thumbnail error:', e);
                 }
             });
             
-            // Add new slide button
             const btn = document.createElement('div');
             btn.className = 'tool-btn';
             btn.innerHTML = '+';
@@ -526,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = addNewPage;
             slideStrip.appendChild(btn);
         } catch(e) {
-            console.error('Error rendering sidebar:', e);
+            console.error('Sidebar error:', e);
         }
     }
 
@@ -546,11 +709,11 @@ document.addEventListener('DOMContentLoaded', () => {
             attachEvents();
             updateUI();
         } catch(e) {
-            console.error('Error rendering main canvas:', e);
+            console.error('Main render error:', e);
         }
     }
 
-    // --- 6. HISTORY & PERSISTENCE ---
+    // ━━━ 8. HISTORY & SAVE ━━━
     function pushHistory() {
         const state = JSON.stringify(currentDeck);
         if (historyIndex < history.length - 1) {
@@ -575,6 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deselect();
             render(); 
             save(); 
+            // showNotification('Undo', 'info');
         }
     }
 
@@ -585,6 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deselect();
             render(); 
             save(); 
+            // showNotification('Redo', 'info');
         }
     }
 
@@ -612,20 +777,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch(e) {
                 console.error('Save failed:', e);
                 if (saveStatus) {
-                    saveStatus.textContent = 'Save Failed!';
+                    saveStatus.textContent = 'Failed!';
                     saveStatus.style.color = '#ef4444';
                 }
-                // Check if storage is full
                 if (e.name === 'QuotaExceededError') {
-                    alert('Storage is full! Please export your project or delete some slides.');
-                } else {
-                    alert('Failed to save. Error: ' + e.message);
+                    showNotification('Storage full! Export project.', 'error');
                 }
             }
         } 
     }
 
-    // --- 7. SLIDE MANAGEMENT ---
+    pushHistory();
+// ═══════════════════════════════════════════════════════════════════
+// PART 2 - Paste this directly after Part 1
+// ═══════════════════════════════════════════════════════════════════
+
+    // ━━━ 9. SLIDE MANAGEMENT ━━━
     function moveSlidePage(index, dir) {
         try {
             if ((dir === -1 && index > 0) || (dir === 1 && index < currentDeck.pages.length - 1)) {
@@ -635,16 +802,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 activePageIndex = index + dir; 
                 pushHistory(); 
                 render();
+                // showNotification('Slide moved', 'success');
             }
         } catch(e) {
-            console.error('Error moving slide:', e);
+            console.error('Move error:', e);
+            showNotification('Move failed', 'error');
         }
     }
 
     function deleteSlidePage(index) {
         try {
             if (currentDeck.pages.length <= 1) {
-                alert("Cannot delete the last slide");
+                showNotification('Cannot delete last slide', 'error');
                 return;
             }
             if (!confirm(`Delete slide ${index + 1}?`)) return;
@@ -655,9 +824,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             pushHistory(); 
             render();
+            // showNotification('Slide deleted', 'success');
         } catch(e) {
-            console.error('Error deleting slide:', e);
-            alert('Failed to delete slide. Error: ' + e.message);
+            console.error('Delete error:', e);
+            showNotification('Delete failed', 'error');
         }
     }
 
@@ -673,9 +843,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activePageIndex = index + 1;
             pushHistory();
             render();
+            // showNotification('Slide duplicated', 'success');
         } catch(e) {
-            console.error('Error duplicating slide:', e);
-            alert('Failed to duplicate slide. Error: ' + e.message);
+            console.error('Duplicate error:', e);
+            showNotification('Duplicate failed', 'error');
         }
     }
 
@@ -701,13 +872,102 @@ document.addEventListener('DOMContentLoaded', () => {
             pushHistory(); 
             activePageIndex = currentDeck.pages.length - 1; 
             render();
+            // showNotification('New slide added', 'success');
         } catch(e) {
-            console.error('Error adding new page:', e);
-            alert('Failed to add new slide. Error: ' + e.message);
+            console.error('Add slide error:', e);
+            showNotification('Add failed', 'error');
         }
     }
 
-    // --- 8. EVENT HANDLING ---
+    // ━━━ 10. CANVAS PANNING ━━━
+    function setupCanvasPanning() {
+        if (!canvasArea) return;
+
+        let spacePressed = false;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !editingId && e.target.tagName !== 'INPUT' && e.target.contentEditable !== 'true') {
+                e.preventDefault();
+                spacePressed = true;
+                canvasArea.classList.add('panning');
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                spacePressed = false;
+                canvasArea.classList.remove('panning', 'active');
+            }
+        });
+
+        canvasArea.addEventListener('mousedown', (e) => {
+            if (spacePressed) {
+                e.preventDefault();
+                isPanning = true;
+                panStartX = e.clientX - panOffsetX;
+                panStartY = e.clientY - panOffsetY;
+                canvasArea.classList.add('active');
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isPanning && spacePressed) {
+                panOffsetX = e.clientX - panStartX;
+                panOffsetY = e.clientY - panStartY;
+                applyPan();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                canvasArea.classList.remove('active');
+            }
+        });
+
+        if (isTouchDevice) {
+            let touchStartDist = 0;
+            let initialScale = 1;
+
+            canvasArea.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isPanning = true;
+                    touchStartDist = getTouchDistance(e.touches);
+                    initialScale = currentScale;
+                }
+            });
+
+            canvasArea.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && isPanning) {
+                    e.preventDefault();
+                    const dist = getTouchDistance(e.touches);
+                    const scale = initialScale * (dist / touchStartDist);
+                    currentScale = Math.max(0.5, Math.min(3, scale));
+                    fitCanvas();
+                }
+            });
+
+            canvasArea.addEventListener('touchend', () => {
+                isPanning = false;
+            });
+        }
+    }
+
+    function getTouchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function applyPan() {
+        if (!mainCanvas) return;
+        mainCanvas.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px)`;
+    }
+
+    setupCanvasPanning();
+
+    // ━━━ 11. EVENT HANDLING ━━━
     function attachEvents() {
         const content = document.getElementById('mainSlideContent');
         if (!content) return;
@@ -720,21 +980,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
+            if (isTouchDevice) {
+                content.ontouchstart = (e) => {
+                    if (e.target === content && e.touches.length === 1) { 
+                        if(activeTool === 'text') {
+                            const touch = e.touches[0];
+                            createText({ clientX: touch.clientX, clientY: touch.clientY });
+                        } else {
+                            deselect();
+                        }
+                    }
+                };
+            }
+
             currentDeck.pages[activePageIndex].elements.forEach(el => {
                 const dom = document.getElementById(el.id);
                 if(!dom) return;
 
                 try {
-                    // Right-click context menu
                     if (features.contextMenu) {
                         dom.oncontextmenu = (e) => {
                             e.preventDefault();
                             if (selectedId !== el.id) select(el.id);
                             showContextMenu(e.clientX, e.clientY);
                         };
+
+                        if (isTouchDevice) {
+                            let longPressTimer;
+                            dom.addEventListener('touchstart', (e) => {
+                                longPressTimer = setTimeout(() => {
+                                    const touch = e.touches[0];
+                                    if (selectedId !== el.id) select(el.id);
+                                    showContextMenu(touch.clientX, touch.clientY);
+                                }, 500);
+                            });
+                            dom.addEventListener('touchend', () => {
+                                clearTimeout(longPressTimer);
+                            });
+                            dom.addEventListener('touchmove', () => {
+                                clearTimeout(longPressTimer);
+                            });
+                        }
                     }
 
-                    if(el.type !== 'image' && el.type !== 'rect' && el.type !== 'circle' && el.type !== 'line') {
+                    if(el.type !== 'image' && !['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
                         dom.ondblclick = (e) => { 
                             e.stopPropagation(); 
                             enterEditMode(el.id); 
@@ -742,7 +1031,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     dom.onmousedown = (e) => {
-                        // Don't intercept text selection when editing
                         if (editingId === el.id && e.target.classList.contains('element-text')) {
                             return;
                         }
@@ -764,17 +1052,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         if(selectedId !== el.id) select(el.id); 
                         initDrag(e, dom, el);
                     };
+
+                    if (isTouchDevice) {
+                        dom.addEventListener('touchstart', (e) => {
+                            if (e.touches.length !== 1) return;
+                            if (activeTool !== 'select' || editingId === el.id) return;
+                            
+                            const touch = e.touches[0];
+                            if(selectedId !== el.id) select(el.id);
+                            initDrag({ clientX: touch.clientX, clientY: touch.clientY }, dom, el);
+                        });
+                    }
                 } catch(e) {
-                    console.error('Error attaching events to element:', el, e);
+                    console.error('Event attach error:', e);
                 }
             });
         } catch(e) {
-            console.error('Error in attachEvents:', e);
+            console.error('Attach events error:', e);
         }
     }
 
     function handleKeydown(e) {
-        if (editingId && e.target.contentEditable === 'true') {
+        // FIXED: Don't trigger shortcuts when typing
+        if (editingId || e.target.tagName === 'INPUT' || e.target.contentEditable === 'true') {
             return;
         }
 
@@ -808,7 +1108,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Hide context menu
         if (contextMenu && !e.target.closest('#contextMenu')) {
             contextMenu.classList.remove('visible');
         }
@@ -817,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', handleKeydown);
     document.addEventListener('mousedown', handleGlobalClick);
 
-    // --- 9. SELECTION & EDITING ---
+    // ━━━ 12. SELECTION & EDITING ━━━
     function select(id) { 
         selectedId = id; 
         renderMain(); 
@@ -839,7 +1138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedId = null; 
         pushHistory(); 
         renderMain(); 
-        renderSidebar(); 
+        renderSidebar();
+        // showNotification('Element deleted', 'success');
     }
 
     function duplicateElement() {
@@ -856,6 +1156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pushHistory();
         render();
         select(clone.id);
+        // showNotification('Element duplicated', 'success');
     }
 
     function enterEditMode(id) { 
@@ -896,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSidebar(); 
     }
 
-    // --- 10. ELEMENT CREATION ---
+    // ━━━ 13. ELEMENT CREATION ━━━
     function createText(e) {
         try {
             const r = document.getElementById('mainSlideContent').getBoundingClientRect(); 
@@ -920,7 +1221,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setActiveTool('select'); 
             setTimeout(() => enterEditMode(n.id), 50);
         } catch(e) {
-            console.error('Error creating text:', e);
+            console.error('Create text error:', e);
+            showNotification('Failed to create text', 'error');
         }
     }
 
@@ -939,13 +1241,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pushHistory();
             render();
             select(shape.id);
+            closeAllDropdowns();
+            // showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} added`, 'success');
         } catch(e) {
-            console.error('Error creating shape:', e);
-            alert('Failed to create shape. Error: ' + e.message);
+            console.error('Create shape error:', e);
+            showNotification('Failed to create shape', 'error');
         }
     }
 
-    // --- 11. DRAG & RESIZE ---
+    // ━━━ 14. DRAG & RESIZE ━━━
     function snapToGrid(value, gridSize = 10) {
         return Math.round(value / gridSize) * gridSize;
     }
@@ -975,12 +1279,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if(frameId) cancelAnimationFrame(frameId); 
             window.removeEventListener('mousemove', mv); 
             window.removeEventListener('mouseup', up); 
+            window.removeEventListener('touchmove', touchMv);
+            window.removeEventListener('touchend', up);
             pushHistory(); 
             renderSidebar(); 
         }; 
         
         window.addEventListener('mousemove', mv); 
-        window.addEventListener('mouseup', up); 
+        window.addEventListener('mouseup', up);
+        
+        if (isTouchDevice) {
+            const touchMv = (ev) => {
+                if (ev.touches.length === 1) {
+                    mv({ clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY });
+                }
+            };
+            window.addEventListener('touchmove', touchMv);
+            window.addEventListener('touchend', up);
+        }
     }
 
     function startResize(e, dom, data, dir) { 
@@ -1085,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('mouseup', up); 
     }
 
-    // --- 12. FORMATTING UI ---
+    // ━━━ 15. FORMATTING UI (25 FONTS) ━━━
     function updateUI() {
         if (!bottomBar) return;
         
@@ -1103,13 +1419,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if(el.type === 'text' || el.type === 'title') {
             html += `
                 <select id="fontFamily" class="font-select">
-                    <option value="Inter, sans-serif" style="font-family: Inter;">Inter</option>
-                    <option value="Arial, sans-serif" style="font-family: Arial;">Arial</option>
-                    <option value="'Courier New', monospace" style="font-family: 'Courier New';">Courier New</option>
-                    <option value="Georgia, serif" style="font-family: Georgia;">Georgia</option>
-                    <option value="Impact, sans-serif" style="font-family: Impact;">Impact</option>
-                    <option value="'Times New Roman', serif" style="font-family: 'Times New Roman';">Times New Roman</option>
-                    <option value="Verdana, sans-serif" style="font-family: Verdana;">Verdana</option>
+                    <option value="Inter, sans-serif">Inter</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Helvetica, sans-serif">Helvetica</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="Impact, sans-serif">Impact</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                    <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                    <option value="'Arial Black', sans-serif">Arial Black</option>
+                    <option value="Palatino, serif">Palatino</option>
+                    <option value="Garamond, serif">Garamond</option>
+                    <option value="Bookman, serif">Bookman</option>
+                    <option value="'Lucida Console', monospace">Lucida Console</option>
+                    <option value="Monaco, monospace">Monaco</option>
+                    <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                    <option value="Tahoma, sans-serif">Tahoma</option>
+                    <option value="Rockwell, serif">Rockwell</option>
+                    <option value="'Franklin Gothic Medium', sans-serif">Franklin Gothic</option>
+                    <option value="'Brush Script MT', cursive">Brush Script</option>
+                    <option value="Copperplate, serif">Copperplate</option>
+                    <option value="Papyrus, fantasy">Papyrus</option>
+                    <option value="'Lucida Sans', sans-serif">Lucida Sans</option>
+                    <option value="Didot, serif">Didot</option>
                 </select>
                 <input type="number" id="fontSize" class="font-size-input" min="8" max="200" value="${el.fontSize || 40}">
                 <div class="toolbar-divider"></div>
@@ -1117,17 +1451,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="format-btn ${el.fontStyle === 'italic' ? 'active' : ''}" id="btnItalic" title="Italic"><em>I</em></button>
                 <button class="format-btn ${el.textDecoration === 'underline' ? 'active' : ''}" id="btnUnderline" title="Underline"><u>U</u></button>
                 <div class="toolbar-divider"></div>
-                <button class="format-btn ${el.textAlign === 'left' ? 'active' : ''}" id="btnAlignLeft" title="Align Left">
+                <button class="format-btn ${el.textAlign === 'left' ? 'active' : ''}" id="btnAlignLeft" title="Left">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/>
                     </svg>
                 </button>
-                <button class="format-btn ${el.textAlign === 'center' ? 'active' : ''}" id="btnAlignCenter" title="Align Center">
+                <button class="format-btn ${el.textAlign === 'center' ? 'active' : ''}" id="btnAlignCenter" title="Center">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 3h18v2H3V3zm3 4h12v2H6V7zm-3 4h18v2H3v-2zm3 4h12v2H6v-2zm-3 4h18v2H3v-2z"/>
                     </svg>
                 </button>
-                <button class="format-btn ${el.textAlign === 'right' ? 'active' : ''}" id="btnAlignRight" title="Align Right">
+                <button class="format-btn ${el.textAlign === 'right' ? 'active' : ''}" id="btnAlignRight" title="Right">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 3h18v2H3V3zm6 4h12v2H9V7zm-6 4h18v2H3v-2zm6 4h12v2H9v-2zm-6 4h18v2H3v-2z"/>
                     </svg>
@@ -1138,21 +1472,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="toolbar-divider"></div>
             `;
-        } else if (el.type === 'rect' || el.type === 'circle' || el.type === 'line') {
+        } else if (['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
             html += `
-                <div class="color-wrapper" title="Fill Color">
+                <div class="color-wrapper" title="Fill">
                     <input type="color" id="fillColor" class="color-input" value="${el.fill || '#3b82f6'}">
                 </div>
-                <div class="color-wrapper" title="Border Color">
+                <div class="color-wrapper" title="Border">
                     <input type="color" id="strokeColor" class="color-input" value="${el.stroke || '#000000'}">
                 </div>
-                <input type="number" id="strokeWidth" class="font-size-input" min="0" max="20" value="${el.strokeWidth || 2}" title="Border Width">
+                <input type="number" id="strokeWidth" class="font-size-input" min="0" max="20" value="${el.strokeWidth || 2}" title="Border">
                 <div class="toolbar-divider"></div>
             `;
         }
         
         html += `
-            <button class="format-btn" id="btnLayerBack" title="Send Backward">
+            <button class="format-btn" id="btnLayerBack" title="Send Back">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 16l-6-6 1.41-1.41L12 13.17l4.59-4.58L18 10z"/>
                 </svg>
@@ -1166,7 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         bottomBar.innerHTML = html;
 
-        // Attach event listeners
+        // Attach listeners
         if(el.type === 'text' || el.type === 'title') {
             const fontSel = document.getElementById('fontFamily');
             if (fontSel) {
@@ -1174,15 +1508,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 fontSel.onchange = (e) => setProp('fontFamily', e.target.value);
             }
             
+            // FIXED: Font size keeps focus
             const fontSizeInput = document.getElementById('fontSize');
             if (fontSizeInput) {
-                fontSizeInput.oninput = (e) => setProp('fontSize', parseInt(e.target.value) || 40);
+                fontSizeInput.oninput = (e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val >= 8 && val <= 200) {
+                        setProp('fontSize', val);
+                    }
+                };
+                fontSizeInput.onkeydown = (e) => e.stopPropagation();
             }
             
             const colorInput = document.getElementById('textColor');
-            if (colorInput) {
-                colorInput.oninput = (e) => setProp('color', e.target.value);
-            }
+            if (colorInput) colorInput.oninput = (e) => setProp('color', e.target.value);
             
             const btnBold = document.getElementById('btnBold');
             if (btnBold) btnBold.onclick = () => togProp('fontWeight', 'bold', 'normal');
@@ -1201,21 +1540,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const btnAlignRight = document.getElementById('btnAlignRight');
             if (btnAlignRight) btnAlignRight.onclick = () => setProp('textAlign', 'right');
-        } else if (el.type === 'rect' || el.type === 'circle' || el.type === 'line') {
+        } else if (['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
             const fillColor = document.getElementById('fillColor');
-            if (fillColor) {
-                fillColor.oninput = (e) => setProp('fill', e.target.value);
-            }
+            if (fillColor) fillColor.oninput = (e) => setProp('fill', e.target.value);
             
             const strokeColor = document.getElementById('strokeColor');
-            if (strokeColor) {
-                strokeColor.oninput = (e) => setProp('stroke', e.target.value);
-            }
+            if (strokeColor) strokeColor.oninput = (e) => setProp('stroke', e.target.value);
             
             const strokeWidth = document.getElementById('strokeWidth');
-            if (strokeWidth) {
-                strokeWidth.oninput = (e) => setProp('strokeWidth', parseInt(e.target.value) || 2);
-            }
+            if (strokeWidth) strokeWidth.oninput = (e) => setProp('strokeWidth', parseInt(e.target.value) || 2);
         }
 
         const btnFront = document.getElementById('btnLayerFront');
@@ -1247,7 +1580,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 pushHistory(); 
                 renderMain(); 
                 renderSidebar();
-                updateUI(); 
             }
         } 
     };
@@ -1265,15 +1597,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     };
 
-    // --- 13. CONTEXT MENU ---
+    // ━━━ 16. CONTEXT MENU ━━━
     function showContextMenu(x, y) {
         if (!contextMenu || !features.contextMenu) return;
         try {
-            contextMenu.style.left = x + 'px';
-            contextMenu.style.top = y + 'px';
+            const menuRect = contextMenu.getBoundingClientRect();
+            let finalX = x;
+            let finalY = y;
+
+            if (x + menuRect.width > window.innerWidth) {
+                finalX = window.innerWidth - menuRect.width - 10;
+            }
+            if (y + menuRect.height > window.innerHeight) {
+                finalY = window.innerHeight - menuRect.height - 10;
+            }
+            
+            contextMenu.style.left = finalX + 'px';
+            contextMenu.style.top = finalY + 'px';
             contextMenu.classList.add('visible');
         } catch(e) {
-            console.error('Error showing context menu:', e);
+            console.error('Context menu error:', e);
         }
     }
 
@@ -1282,76 +1625,56 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctxDuplicate = document.getElementById('ctxDuplicate');
         if (ctxDuplicate) {
             ctxDuplicate.addEventListener('click', () => {
-                try {
-                    duplicateElement();
-                    contextMenu.classList.remove('visible');
-                } catch(e) {
-                    console.error('Error duplicating element:', e);
-                }
+                duplicateElement();
+                contextMenu.classList.remove('visible');
             });
         }
 
         const ctxLayerFront = document.getElementById('ctxLayerFront');
         if (ctxLayerFront) {
             ctxLayerFront.addEventListener('click', () => {
-                try {
-                    moveLayer(1);
-                    contextMenu.classList.remove('visible');
-                } catch(e) {
-                    console.error('Error moving layer:', e);
-                }
+                moveLayer(1);
+                contextMenu.classList.remove('visible');
             });
         }
 
         const ctxLayerBack = document.getElementById('ctxLayerBack');
         if (ctxLayerBack) {
             ctxLayerBack.addEventListener('click', () => {
-                try {
-                    moveLayer(-1);
-                    contextMenu.classList.remove('visible');
-                } catch(e) {
-                    console.error('Error moving layer:', e);
-                }
+                moveLayer(-1);
+                contextMenu.classList.remove('visible');
             });
         }
 
         const ctxDelete = document.getElementById('ctxDelete');
         if (ctxDelete) {
             ctxDelete.addEventListener('click', () => {
-                try {
-                    deleteSelected();
-                    contextMenu.classList.remove('visible');
-                } catch(e) {
-                    console.error('Error deleting element:', e);
-                }
+                deleteSelected();
+                contextMenu.classList.remove('visible');
             });
         }
 
-        // Animation submenu
         document.querySelectorAll('[data-animation]').forEach(item => {
             item.addEventListener('click', () => {
-                try {
-                    const animation = item.dataset.animation;
-                    if (selectedId) {
-                        const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
-                        if (el) {
-                            el.animation = animation;
-                            pushHistory();
-                            renderSidebar();
-                        }
+                const animation = item.dataset.animation;
+                if (selectedId) {
+                    const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
+                    if (el) {
+                        el.animation = animation;
+                        pushHistory();
+                        renderSidebar();
+                        // showNotification(`Animation: ${animation}`, 'success');
                     }
-                    contextMenu.classList.remove('visible');
-                } catch(e) {
-                    console.error('Error setting animation:', e);
                 }
+                contextMenu.classList.remove('visible');
             });
         });
     } catch(e) {
-        console.error('Error setting up context menu:', e);
+        console.error('Context menu setup error:', e);
         features.contextMenu = false;
     }
 
-    // --- 14. CANVAS SCALING ---
+    // ━━━ 17. CANVAS SCALING ━━━
     function fitCanvas() { 
         if(document.body.classList.contains('presenting')) return; 
         
@@ -1367,16 +1690,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('resize', fitCanvas);
 
-    // --- 15. PRESENTATION MODE ---
+    // ━━━ 18. PRESENTATION MODE ━━━
     if (presentBtn) {
         presentBtn.onclick = () => { 
             document.body.classList.add('presenting'); 
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Fullscreen failed:', err);
+                    console.log('Fullscreen error:', err);
                 });
             }
             deselect(); 
+            panOffsetX = 0;
+            panOffsetY = 0;
             document.addEventListener('keydown', handlePresentNav); 
             
             const s = document.querySelector('.editor-shell'); 
@@ -1453,7 +1778,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!document.fullscreenElement) exitPresentation(); 
     });
 
-    // --- 16. TOOLBAR TOOLS ---
+    // ━━━ 19. TOOLBAR TOOLS ━━━
     const selectTool = document.getElementById('selectTool');
     const textTool = document.getElementById('textTool');
     const imageTool = document.getElementById('imageTool');
@@ -1462,10 +1787,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (textTool) textTool.onclick = () => setActiveTool('text', textTool);
     if (imageTool) imageTool.onclick = () => imgInput.click();
 
-    // Shape tools
-    document.getElementById('shapeRect')?.addEventListener('click', () => createShape('rect'));
-    document.getElementById('shapeCircle')?.addEventListener('click', () => createShape('circle'));
-    document.getElementById('shapeLine')?.addEventListener('click', () => createShape('line'));
+    const shapes = ['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'];
+    shapes.forEach(shape => {
+        const btn = document.getElementById(`shape${shape.charAt(0).toUpperCase() + shape.slice(1)}`);
+        if (btn) {
+            btn.addEventListener('click', () => createShape(shape));
+        }
+    });
 
     function setActiveTool(t, b) { 
         activeTool = t; 
@@ -1486,13 +1814,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if(t === 'text') deselect(); 
     }
 
-    // --- 17. IMAGE UPLOAD ---
+    // ━━━ 20. IMAGE UPLOAD ━━━
     if (imgInput) {
         imgInput.onchange = (e) => { 
             if(e.target.files[0]) {
-                // Validate size
                 if (e.target.files[0].size > 5 * 1024 * 1024) {
-                    alert('Image too large (max 5MB)');
+                    showNotification('Image too large (max 5MB)', 'error');
                     e.target.value = '';
                     return;
                 }
@@ -1511,7 +1838,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentDeck.pages[activePageIndex].elements.push(n); 
                     pushHistory(); 
                     render(); 
-                    select(n.id); 
+                    select(n.id);
+                    // showNotification('Image added', 'success');
                 }; 
                 r.readAsDataURL(e.target.files[0]); 
             }
@@ -1519,7 +1847,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 18. TITLE EDITING ---
+    // ━━━ 21. TITLE EDITING ━━━
     if (titleElement) {
         titleElement.ondblclick = () => { 
             const i = document.createElement('input'); 
@@ -1534,6 +1862,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 save(); 
                 titleElement.innerText = currentDeck.title; 
                 i.replaceWith(titleElement);
+                // showNotification('Title updated', 'success');
             }; 
             
             i.onblur = s; 
@@ -1549,7 +1878,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 19. HELP MODAL ---
+    // ━━━ 22. HELP MODAL ━━━
     const btnHelp = document.getElementById('btnHelp');
     const helpModal = document.getElementById('helpModal');
     const closeHelp = document.getElementById('closeHelp');
@@ -1569,7 +1898,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- 20. LOADING STATE ---
+    // ━━━ 23. LOADING STATE ━━━
     function showLoading(message = 'Loading...') {
         try {
             const loader = document.createElement('div');
@@ -1583,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             document.body.appendChild(loader);
         } catch(e) {
-            console.error('Error showing loading overlay:', e);
+            console.error('Loading overlay error:', e);
         }
     }
 
@@ -1592,15 +1921,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('loadingOverlay');
             if (loader) loader.remove();
         } catch(e) {
-            console.error('Error hiding loading overlay:', e);
+            console.error('Hide loading error:', e);
         }
     }
 
-    // --- 21. INITIAL RENDER ---
+    // ━━━ 24. INITIAL RENDER ━━━
     try {
         render();
+        // showNotification('Editor loaded', 'success');
     } catch(e) {
-        console.error('Error in initial render:', e);
-        alert('An error occurred while loading the editor. Please refresh the page.');
+        console.error('Initial render error:', e);
+        showNotification('Editor error', 'error');
     }
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// END OF MOLTENSLIDES EDITOR
+// ═══════════════════════════════════════════════════════════════════
