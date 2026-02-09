@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor - MoltenSLIDES</title>
+    <link rel="stylesheet" href="../style.css"> 
+    
+    <!-- Required Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* Essential Menu CSS to ensure visibility */
+        .dropdown-container { position: relative; display: flex; align-items: center; }
+        .dropdown-menu {
+            display: none; position: absolute; top: 100%; left: 0; margin-top: 4px;
+            background: #18181b; border: 1px solid #27272a; border-radius: 8px;
+            padding: 6px; min-width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 2000; flex-direction: column;
+        }
+        .dropdown-container:hover .dropdown-menu { display: flex; }
+        .dropdown-item {
+            padding: 8px 12px; font-size: 0.85rem; color: #a1a1aa;
+            cursor: pointer; border-radius: 4px; transition: 0.1s;
+            white-space: nowrap;
+        }
+        .dropdown-item:hover { background: #27272a; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="editor-shell">
+        <input type="file" id="imgUpload" accept="image/*" style="display: none;">
+        <input type="file" id="jsonUpload" accept=".json" style="display: none;">
+
+        <header class="editor-toolbar">
+            <div class="toolbar-group">
+                <a href="../index.html" class="tool-btn" title="Back to Hub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </a>
+                
+                <div class="toolbar-divider"></div>
+
+                <div class="dropdown-container">
+                    <button class="tool-btn" style="width: auto; padding: 0 12px; font-weight: 600; font-size: 0.9rem;">File</button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item" id="btnImport">Import Project</div>
+                        <div style="height:1px; background:#27272a; margin: 4px 0;"></div>
+                        <div class="dropdown-item" id="btnExportJSON">Save Project (JSON)</div>
+                        <div class="dropdown-item" id="btnExportPPTX">Export to PowerPoint</div>
+                        <div class="dropdown-item" id="btnExportPDF">Print / Save as PDF</div>
+                        <div style="height:1px; background:#27272a; margin: 4px 0;"></div>
+                        <div class="dropdown-item" id="btnDeleteDeck" style="color: #ef4444;">Delete Deck</div>
+                    </div>
+                </div>
+
+                <div class="toolbar-divider"></div>
+                <div id="editorTitle" style="font-weight: 700; color: #fff; cursor: pointer; padding: 4px 8px; border-radius: 4px;" title="Double click to rename">Loading...</div>
+                <div id="saveStatus" class="save-status">Saved</div>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="tool-btn" id="btnHelp" title="Keyboard Shortcuts">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+                    </svg>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="tool-btn active" title="Select" id="selectTool">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2l12 11.2-5.8.5 3.3 7.3-2.2.9-3.2-7.4-4.4 4.6z"/></svg>
+                </button>
+                <button class="tool-btn" title="Text Box" id="textTool">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z"/></svg>
+                </button>
+                <button class="tool-btn" title="Image" id="imageTool">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                </button>
+                
+                <!-- Shapes Dropdown -->
+                <div class="dropdown-container">
+                    <button class="tool-btn" title="Shapes">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 3h18v18H3V3zm16 16V5H5v14h14z"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item" id="shapeRect">Rectangle</div>
+                        <div class="dropdown-item" id="shapeCircle">Circle</div>
+                        <div class="dropdown-item" id="shapeLine">Line</div>
+                    </div>
+                </div>
+                
+                <div class="toolbar-divider"></div>
+                <button id="presentBtn" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Present
+                </button>
+            </div>
+        </header>
+
+        <div class="editor-workspace">
+            <div class="slide-strip" id="slideStrip"></div>
+            <div class="canvas-area">
+                <div class="slide-canvas">
+                    <div class="slide-content editor-scaler" id="mainSlideContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bottomBar" class="bottom-bar hidden"></div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-item" id="ctxDuplicate">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            Duplicate
+        </div>
+        <div class="context-item" id="ctxLayerFront">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+            </svg>
+            Bring Forward
+        </div>
+        <div class="context-item" id="ctxLayerBack">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 16l-6-6 1.41-1.41L12 13.17l4.59-4.58L18 10z"/>
+            </svg>
+            Send Backward
+        </div>
+        <div class="context-divider"></div>
+        <div class="context-submenu">
+            <div class="context-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+                </svg>
+                Animation
+                <span class="context-submenu-arrow">▶</span>
+            </div>
+            <div class="submenu-content">
+                <div class="context-item" data-animation="none">None</div>
+                <div class="context-item" data-animation="appear">Appear</div>
+                <div class="context-item" data-animation="fly-left">Fly In Left</div>
+                <div class="context-item" data-animation="fly-right">Fly In Right</div>
+                <div class="context-item" data-animation="fly-top">Fly In Top</div>
+                <div class="context-item" data-animation="fly-bottom">Fly In Bottom</div>
+                <div class="context-item" data-animation="bounce">Bounce</div>
+                <div class="context-item" data-animation="pulse">Pulse</div>
+            </div>
+        </div>
+        <div class="context-divider"></div>
+        <div class="context-item" id="ctxDelete" style="color: #ef4444;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+            Delete
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div id="errorModal" class="modal hidden">
+            <div class="modal-header">Deck Not Found</div>
+            <div class="modal-actions"><button class="btn-primary" onclick="window.location.href='../index.html'">Back to Hub</button></div>
+        </div>
+
+        <div id="helpModal" class="modal hidden help-modal">
+            <div class="modal-header">Keyboard Shortcuts</div>
+            <div class="help-shortcuts">
+                <div class="help-shortcut">
+                    <span>Undo</span>
+                    <span class="help-key">Ctrl + Z</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Redo</span>
+                    <span class="help-key">Ctrl + Y</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Duplicate</span>
+                    <span class="help-key">Ctrl + D</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Delete</span>
+                    <span class="help-key">Delete</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Exit Edit Mode</span>
+                    <span class="help-key">Escape</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Next Slide (Presenting)</span>
+                    <span class="help-key">→ or Space</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Previous Slide (Presenting)</span>
+                    <span class="help-key">←</span>
+                </div>
+                <div class="help-shortcut">
+                    <span>Exit Presentation</span>
+                    <span class="help-key">Escape</span>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 1.5rem;">
+                <button class="btn-secondary" id="closeHelp">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
