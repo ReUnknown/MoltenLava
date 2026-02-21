@@ -18,7 +18,6 @@
         </div>
         <div class="nav-links">
             <a href="https://github.com/ReUnknown/MoltenLava" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href="App/index.html" class="btn-nav glow-target">Open Editor</a>
         </div>
     </nav>
 
@@ -27,22 +26,22 @@
 
         <div class="announcement-badge scroll-reveal">
             <span class="badge-pulse"></span>
-            The All-New MoltenLava
+            Building the ultimate suite
         </div>
         <h1 class="hero-title scroll-reveal delay-1">
             Forge your vision in one <br><span class="text-highlight">unified workspace.</span>
         </h1>
         <p class="hero-description scroll-reveal delay-2">
-            A professional, browser-based creative environment starting with powerful photo editing, seamlessly expanding to documents and slides.
+            Experience our markdown presentation builder today, while we forge the open-source photo and document editor of tomorrow.
         </p>
-        </section>
+    </section>
 
     <section class="screen flex-center bg-alt">
         <div class="content-block">
-            <h2 class="section-title scroll-reveal">The Goal.</h2>
+            <h2 class="section-title scroll-reveal">The Vision.</h2>
             <h3 class="statement-text scroll-reveal delay-1">No silos. No paywalls. <br>Just pure creative freedom.</h3>
             <p class="section-desc scroll-reveal delay-2">
-                We believe you shouldn't have to jump between five different apps to finish one project. MoltenLava is being built from the ground up to handle your photos, documents, and slides in a single, blazing-fast browser tab.
+                We believe you shouldn't have to jump between five different apps to finish one project. MoltenLava is being built from the ground up to handle your photos, documents, and slides in a single, blazing-fast browser tab. 
             </p>
         </div>
     </section>
@@ -50,43 +49,53 @@
     <section class="screen flex-center">
         <div class="feature-grid">
             <div class="feature-text scroll-reveal">
-                <span class="feature-tag">The Flagship</span>
-                <h2 class="feature-title">MoltenLava Editor</h2>
+                <span class="feature-tag tag-active">Available Now</span>
+                <h2 class="feature-title">MoltenSLIDES</h2>
                 <p class="section-desc">
-                    Our core professional-grade photo editing environment. Layer support, non-destructive adjustments, and lightning-fast rendering—all running locally in your browser.
+                    Create stunning, responsive presentation decks directly in your browser. Complete with Markdown support, instant preview, and clean exporting. Try the first piece of the Molten ecosystem today.
                 </p>
                 <div style="margin-top: 2rem;">
-                    <a href="App/index.html" class="btn btn-pro glow-target" style="padding: 1rem 2rem; font-size: 1rem;">Launch Editor &rarr;</a>
+                    <a href="MoltenSLIDES/index.html" target="_blank" class="btn btn-pro glow-target" style="padding: 1rem 2rem; font-size: 1rem;">Launch MoltenSLIDES &rarr;</a>
                 </div>
             </div>
             <div class="feature-visual scroll-reveal delay-1">
-                <div class="abstract-editor">
-                    <div class="ae-sidebar"></div>
-                    <div class="ae-canvas">
-                        <div class="ae-image"></div>
+                 <div class="abstract-slides">
+                    <div class="as-slide main">
+                        <div style="padding: 20px; font-family: monospace; color: var(--accent-orange);"># Hello World<br><br>Welcome to MoltenSLIDES.</div>
                     </div>
+                    <div class="as-slide bg-1"></div>
+                    <div class="as-slide bg-2"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="screen flex-center bg-alt">
-        <div class="feature-grid reverse">
+    <section class="screen flex-center bg-alt" style="position: relative; overflow: hidden;">
+        <div class="construction-grid"></div>
+
+        <div class="feature-grid reverse" style="position: relative; z-index: 2;">
             <div class="feature-text scroll-reveal">
-                <span class="feature-tag" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">Legacy App</span>
-                <h2 class="feature-title">MoltenSLIDES</h2>
+                <span class="feature-tag tag-teaser">In Development</span>
+                <h2 class="feature-title">MoltenLava Editor</h2>
                 <p class="section-desc">
-                    While we integrate presentation tools directly into the new unified workspace, our classic presentation builder remains fully available to use today.
+                    The core of our unified workspace. A professional-grade photo editing environment with layer support, non-destructive adjustments, and lightning-fast rendering.
                 </p>
                 <div style="margin-top: 2rem;">
-                    <a href="MoltenSLIDES/index.html" target="_blank" class="btn" style="background: var(--bg-surface); border: 1px solid #27272a; color: #fff; padding: 1rem 2rem; font-size: 1rem; border-radius: 8px; transition: background 0.2s;">Access MoltenSLIDES &rarr;</a>
+                    <button class="btn btn-disabled" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                        Coming Soon
+                    </button>
                 </div>
             </div>
             <div class="feature-visual scroll-reveal delay-1">
-                 <div class="abstract-slides">
-                    <div class="as-slide main"></div>
-                    <div class="as-slide bg-1"></div>
-                    <div class="as-slide bg-2"></div>
+                <div class="abstract-editor teaser-mode">
+                    <div class="teaser-overlay">TOP SECRET</div>
+                    <div class="ae-sidebar"></div>
+                    <div class="ae-canvas">
+                        <div class="ae-image" style="filter: blur(4px);"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,13 +106,11 @@
             <svg class="flame-icon massive scroll-reveal" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z" />
             </svg>
-            <h2 class="hero-title scroll-reveal delay-1" style="font-size: 3.5rem;">Ready to forge?</h2>
-            <div class="action-group scroll-reveal delay-2">
-                <a href="App/index.html" class="btn btn-pro glow-target">
-                    Launch MoltenLava Editor
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-left: 8px;">
-                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                    </svg>
+            <h2 class="hero-title scroll-reveal delay-1" style="font-size: 3.5rem;">Join the forge.</h2>
+            <p class="section-desc scroll-reveal delay-2" style="margin-bottom: 2rem;">Help us build the future of open-source tools on GitHub.</p>
+            <div class="action-group scroll-reveal delay-3">
+                <a href="https://github.com/ReUnknown/MoltenLava" target="_blank" class="btn btn-pro glow-target">
+                    View Source Code
                 </a>
             </div>
         </div>
