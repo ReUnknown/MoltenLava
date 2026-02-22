@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="MoltenDocs — Create and edit documents right in your browser. Part of the MoltenLava creative suite.">
+    <title>MoltenDocs — Your Documents</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="hub-header scroll-reveal">
+            <div class="hub-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z"
+                        fill="#FF5E3A" />
+                </svg>
+                <div class="hub-title">
+                    <span style="font-weight: 800;">Molten</span><span
+                        style="font-weight: 200; color: #a1a1aa;">Docs</span>
+                </div>
+            </div>
+            <div class="hub-actions">
+                <a href="../suite.html" class="btn btn-secondary"
+                    style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">&larr; Suite</a>
+            </div>
+        </header>
+
+        <div class="hub-toolbar scroll-reveal delay-1">
+            <div class="search-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-muted)" class="search-icon">
+                    <path
+                        d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search documents...">
+            </div>
+            <button class="btn btn-pro" id="createBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                New Document
+            </button>
+        </div>
+
+        <section class="scroll-reveal delay-2">
+            <div id="docsContainer"></div>
+        </section>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div id="deleteModal" class="modal hidden">
+            <div class="modal-header">Delete Document</div>
+            <div class="modal-body" style="text-align: left;">Are you sure you want to delete <strong
+                    id="deleteTargetName" style="color:#fff;"></strong>? This cannot be undone.</div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="window.closeModals()">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+        <div id="renameModal" class="modal hidden">
+            <div class="modal-header">Rename Document</div>
+            <div class="modal-body"><input type="text" id="renameInput" class="search-input"
+                    placeholder="Enter new name..." style="padding-left: 1rem;"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="window.closeModals()">Cancel</button>
+                <button class="btn btn-pro" id="confirmRenameBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const STORAGE_KEY = 'lavaDocs_v1';
+            let activeDeleteId = null, activeRenameId = null;
+
+            function safeLoad() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { return []; } }
+            let docs = safeLoad();
+            const container = document.getElementById('docsContainer');
+            const searchInput = document.getElementById('searchInput');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const deleteModal = document.getElementById('deleteModal');
+            const renameModal = document.getElementById('renameModal');
+            const createBtn = document.getElementById('createBtn');
+
+            function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(docs)); }
+
+            if (createBtn) createBtn.onclick = createNewDoc;
+
+            function render(filter = "") {
+                if (!container) return;
+                container.innerHTML = "";
+                const filtered = docs.filter(d => d.title.toLowerCase().includes(filter.toLowerCase()));
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="empty-state">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="var(--text-faint)"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                    <h3>${filter ? 'No documents found' : 'No documents yet'}</h3>
+                    <p>${filter ? 'Try different search terms' : 'Click "New Document" to get started!'}</p>
+                </div>`;
+                    return;
+                }
+
+                const grid = document.createElement('div');
+                grid.className = 'docs-grid';
+
+                filtered.forEach(doc => {
+                    const card = document.createElement('div');
+                    card.className = 'doc-card';
+                    card.onclick = (e) => {
+                        if (e.target.closest('.doc-card-menu') || e.target.closest('.menu-dropdown')) return;
+                        window.location.href = `editor.html?id=${doc.id}`;
+                    };
+
+                    // Render preview with formatting using an iframe-like approach
+                    const previewHTML = (doc.content || '<p style="color:#ccc;font-style:italic;">Empty document</p>');
+
+                    card.innerHTML = `
+                    <div class="doc-card-preview">
+                        <div class="doc-preview-page">
+                            <div class="doc-preview-content">${previewHTML}</div>
+                        </div>
+                    </div>
+                    <div class="doc-card-info">
+                        <div class="doc-card-title">${doc.title}</div>
+                        <div class="doc-card-meta">${doc.date}</div>
+                    </div>
+                    <button class="doc-card-menu" onclick="event.stopPropagation(); window.toggleMenu(event, ${doc.id})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                    </button>
+                    <div class="menu-dropdown hidden" id="menu-${doc.id}">
+                        <div class="menu-item" onclick="event.stopPropagation(); window.triggerRename(event, ${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">Rename</div>
+                        <div class="context-divider"></div>
+                        <div class="menu-item danger" onclick="event.stopPropagation(); window.triggerDelete(event, ${doc.id}, '${doc.title.replace(/'/g, "\\'")}')">Delete</div>
+                    </div>
+                `;
+                    grid.appendChild(card);
+                });
+                container.appendChild(grid);
+                initAnimations();
+            }
+
+            function createNewDoc() {
+                const newId = Date.now();
+                docs.unshift({ id: newId, title: 'Untitled Document', date: new Date().toLocaleDateString(), content: '<p><br></p>' });
+                saveToStorage();
+                window.location.href = `editor.html?id=${newId}`;
+            }
+
+            window.toggleMenu = (e, id) => { e.stopPropagation(); document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden')); document.getElementById(`menu-${id}`)?.classList.toggle('hidden'); };
+            window.closeModals = () => { modalOverlay.classList.add('hidden'); deleteModal.classList.add('hidden'); renameModal.classList.add('hidden'); };
+            window.triggerDelete = (e, id, title) => { e.stopPropagation(); document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden')); activeDeleteId = id; document.getElementById('deleteTargetName').innerText = title; modalOverlay.classList.remove('hidden'); deleteModal.classList.remove('hidden'); };
+            window.triggerRename = (e, id, currentTitle) => { e.stopPropagation(); document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden')); activeRenameId = id; const input = document.getElementById('renameInput'); input.value = currentTitle; modalOverlay.classList.remove('hidden'); renameModal.classList.remove('hidden'); input.focus(); };
+
+            document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => { if (activeDeleteId) { docs = docs.filter(d => d.id !== activeDeleteId); saveToStorage(); render(searchInput.value); } window.closeModals(); });
+            document.getElementById('confirmRenameBtn')?.addEventListener('click', () => { const n = document.getElementById('renameInput').value.trim(); if (activeRenameId && n) { const d = docs.find(d => d.id === activeRenameId); if (d) d.title = n; saveToStorage(); render(searchInput.value); } window.closeModals(); });
+            document.addEventListener('click', () => document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden')));
+
+            let hubObs = null;
+            function initAnimations() {
+                if (hubObs) hubObs.disconnect();
+                hubObs = new IntersectionObserver((entries, obs) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }); }, { threshold: 0.1 });
+                document.querySelectorAll('.scroll-reveal').forEach(el => hubObs.observe(el));
+            }
+
+            if (searchInput) searchInput.addEventListener('input', e => render(e.target.value));
+            render();
+        });
+    </script>
+</body>
+
+</html>

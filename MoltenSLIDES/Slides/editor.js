@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // ━━━ 1. CONFIG & STATE ━━━
     const STORAGE_KEY = 'moltenSlides_beta';
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activePageIndex = 0;
     let activeTool = 'select';
     let currentScale = 1;
-    let selectedId = null; 
+    let selectedId = null;
     let editingId = null;
 
     // Canvas panning
@@ -32,10 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_HISTORY = 50;
 
     let currentTextStyle = {
-        fontFamily: 'Inter, sans-serif', 
+        fontFamily: 'Inter, sans-serif',
         color: '#000000',
-        fontWeight: 'normal', 
-        fontStyle: 'normal', 
+        fontWeight: 'normal',
+        fontStyle: 'normal',
         textDecoration: 'none',
         fontSize: 40,
         textAlign: 'left',
@@ -67,8 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ━━━ 2. LOAD DATA ━━━
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if(raw) allDecks = JSON.parse(raw);
-    } catch(e) { 
+        if (raw) allDecks = JSON.parse(raw);
+    } catch (e) {
         console.error('Error loading data:', e);
     }
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!currentDeck) {
         const errorModal = document.getElementById('errorModal');
         const overlay = document.getElementById('modalOverlay');
-        if(errorModal && overlay) {
+        if (errorModal && overlay) {
             errorModal.classList.remove('hidden');
             overlay.classList.remove('hidden');
         }
@@ -95,18 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const contextMenu = document.getElementById('contextMenu');
 
     const jsonInput = document.createElement('input');
-    jsonInput.type = 'file'; 
-    jsonInput.accept = '.json'; 
+    jsonInput.type = 'file';
+    jsonInput.accept = '.json';
     jsonInput.style.display = 'none';
     document.body.appendChild(jsonInput);
 
-    if(titleElement) titleElement.innerText = currentDeck.title;
+    if (titleElement) titleElement.innerText = currentDeck.title;
 
     // ━━━ 3. NOTIFICATION SYSTEM (Critical only) ━━━
     function showNotification(message, type = 'error') {
         // Only show errors and critical info
         if (type !== 'error') return;
-        
+
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.body.appendChild(notification);
-        
+
         setTimeout(() => notification.classList.add('show'), 10);
         setTimeout(() => {
             notification.classList.remove('show');
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupDropdowns() {
         const fileDropdown = document.getElementById('fileDropdown');
         const fileMenu = document.getElementById('fileMenu');
-        
+
         if (fileDropdown) {
             fileDropdown.querySelector('.tool-btn').onclick = (e) => {
                 e.stopPropagation();
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const shapesDropdown = document.getElementById('shapesDropdown');
         const shapesMenu = document.getElementById('shapesMenu');
-        
+
         if (shapesDropdown) {
             shapesDropdown.querySelector('.tool-btn').onclick = (e) => {
                 e.stopPropagation();
@@ -169,16 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function positionDropdown(menu, button) {
         if (!menu || !button) return;
-        
+
         const buttonRect = button.getBoundingClientRect();
         const menuRect = menu.getBoundingClientRect();
-        
+
         if (buttonRect.left + menuRect.width > window.innerWidth) {
             menu.classList.add('align-right');
         } else {
             menu.classList.remove('align-right');
         }
-        
+
         if (buttonRect.bottom + menuRect.height > window.innerHeight) {
             menu.classList.add('align-top');
         } else {
@@ -205,9 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnExportPPTX.onclick = () => { exportPPTX(); closeAllDropdowns(); };
                 } else {
                     btnExportPPTX.style.opacity = '0.5';
-                    btnExportPPTX.onclick = () => { 
-                        showNotification('PowerPoint export unavailable', 'error'); 
-                        closeAllDropdowns(); 
+                    btnExportPPTX.onclick = () => {
+                        showNotification('PowerPoint export unavailable', 'error');
+                        closeAllDropdowns();
                     };
                 }
             }
@@ -217,9 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnExportPDF.onclick = () => { exportPDF(); closeAllDropdowns(); };
                 } else {
                     btnExportPDF.style.opacity = '0.5';
-                    btnExportPDF.onclick = () => { 
-                        showNotification('PDF export unavailable', 'error'); 
-                        closeAllDropdowns(); 
+                    btnExportPDF.onclick = () => {
+                        showNotification('PDF export unavailable', 'error');
+                        closeAllDropdowns();
                     };
                 }
             }
@@ -227,19 +227,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btnExportGIF) {
                 btnExportGIF.onclick = () => { exportGIF(); closeAllDropdowns(); };
             }
-        } catch(e) {
+        } catch (e) {
             console.error('Error setting up file menu:', e);
         }
     }
-    
+
     setupDropdowns();
     setupFileMenu();
-    
+
     // ━━━ 6. EXPORT FUNCTIONS ━━━
     function exportJSON() {
         try {
             const dataStr = JSON.stringify(currentDeck, null, 2);
-            const blob = new Blob([dataStr], {type: "application/json"});
+            const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        } catch(e) {
+        } catch (e) {
             console.error('Export JSON failed:', e);
             showNotification('Export failed', 'error');
         }
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             showLoading('Generating PowerPoint...');
-            
+
             const pptx = new PptxGenJS();
             pptx.layout = 'LAYOUT_16x9';
 
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (page.background) {
                     try {
                         slide.background = { color: page.background.replace('#', '') };
-                    } catch(e) {
+                    } catch (e) {
                         console.warn('Background error:', e);
                     }
                 }
@@ -312,13 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             slide.addShape(shapeType, {
                                 x, y, w, h,
                                 fill: { color: el.fill?.replace('#', '') || '3b82f6' },
-                                line: { 
+                                line: {
                                     color: el.stroke?.replace('#', '') || '000000',
                                     width: (el.strokeWidth || 2) / 50
                                 }
                             });
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.warn('Element error:', e);
                     }
                 });
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await pptx.writeFile({ fileName: `${currentDeck.title}.pptx` });
             hideLoading();
-        } catch(e) {
+        } catch (e) {
             console.error('PPTX export failed:', e);
             hideLoading();
             showNotification('PowerPoint export failed', 'error');
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const wasEditing = editingId;
             const wasSelected = selectedId;
             const originalPan = { x: panOffsetX, y: panOffsetY };
-            
+
             selectedId = null;
             editingId = null;
             panOffsetX = 0;
@@ -361,10 +361,10 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < currentDeck.pages.length; i++) {
                 try {
                     if (i > 0) pdf.addPage();
-                    
+
                     activePageIndex = i;
                     renderMain();
-                    
+
                     await new Promise(resolve => setTimeout(resolve, 500));
 
                     const slideContent = document.getElementById('mainSlideContent');
@@ -381,10 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         scrollX: 0,
                         scrollY: 0
                     });
-                    
+
                     const imgData = canvas.toDataURL('image/png');
                     pdf.addImage(imgData, 'PNG', 0, 0, 1280, 720);
-                } catch(e) {
+                } catch (e) {
                     console.error('Slide error:', e);
                 }
             }
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             pdf.save(`${currentDeck.title.replace(/\s+/g, '_')}.pdf`);
             hideLoading();
-        } catch(e) {
+        } catch (e) {
             console.error('PDF export failed:', e);
             hideLoading();
             showNotification('PDF export failed', 'error');
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             showLoading('Generating animated GIF...');
-            
+
             const page = currentDeck.pages[activePageIndex];
             const slideContent = document.getElementById('mainSlideContent');
             if (!slideContent) {
@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Capture frames for each animation step
             const frames = [];
             const animatedElements = page.elements.filter(el => el.animation && el.animation !== 'none');
-            
+
             // Frame 1: Before animations
             const tempAnimations = {};
             animatedElements.forEach(el => {
@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderMain();
             await new Promise(resolve => setTimeout(resolve, 100));
-            
+
             let canvas = await html2canvas(slideContent, {
                 scale: 1.5,
                 backgroundColor: page.background || '#ffffff',
@@ -450,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             renderMain();
             await new Promise(resolve => setTimeout(resolve, 600)); // Wait for animation
-            
+
             canvas = await html2canvas(slideContent, {
                 scale: 1.5,
                 backgroundColor: page.background || '#ffffff',
@@ -465,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
             finalCanvas.width = 1280;
             finalCanvas.height = 720;
             const ctx = finalCanvas.getContext('2d');
-            
+
             const img = new Image();
             img.onload = () => {
                 ctx.drawImage(img, 0, 0);
@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = frames[frames.length - 1];
 
             renderMain();
-        } catch(e) {
+        } catch (e) {
             console.error('GIF export failed:', e);
             hideLoading();
             showNotification('GIF export failed', 'error');
@@ -491,14 +491,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function deleteDeck() {
         try {
-            if(confirm("Delete this deck? This cannot be undone.")) {
+            if (confirm("Delete this deck? This cannot be undone.")) {
                 allDecks = allDecks.filter(d => d.id != deckId);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks));
                 setTimeout(() => {
                     window.location.href = '../index.html';
                 }, 100);
             }
-        } catch(e) {
+        } catch (e) {
             console.error('Delete failed:', e);
             showNotification('Delete failed', 'error');
         }
@@ -510,7 +510,25 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (ev) => {
                 try {
                     const data = JSON.parse(ev.target.result);
-                    if(data.pages && Array.isArray(data.pages)) {
+
+                    // Cross-app detection: check if this is a MoltenDocs file
+                    if (data.type === 'moltendocs' || (data.content && !data.pages)) {
+                        if (confirm('This looks like a MoltenDocs document file. Did you mean to import it in MoltenDocs instead?')) {
+                            // Import into MoltenDocs
+                            const DOCS_KEY = 'lavaDocs_v1';
+                            let allDocsData = [];
+                            try { allDocsData = JSON.parse(localStorage.getItem(DOCS_KEY)) || []; } catch (err) { allDocsData = []; }
+                            const newId = Date.now();
+                            allDocsData.unshift({ id: newId, title: data.title || 'Imported Document', date: new Date().toLocaleDateString(), content: data.content });
+                            localStorage.setItem(DOCS_KEY, JSON.stringify(allDocsData));
+                            window.location.href = `../../LavaDocs/editor.html?id=${newId}`;
+                            return;
+                        }
+                        e.target.value = '';
+                        return;
+                    }
+
+                    if (data.pages && Array.isArray(data.pages)) {
                         data.id = Date.now();
                         data.title = (data.title || "Untitled") + " (Imported)";
                         allDecks.push(data);
@@ -518,10 +536,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         setTimeout(() => {
                             window.location.href = `?id=${data.id}`;
                         }, 100);
-                    } else { 
+                    } else {
                         showNotification('Invalid file', 'error');
                     }
-                } catch(err) { 
+                } catch (err) {
                     console.error('Import error:', err);
                     showNotification('Import failed', 'error');
                 }
@@ -535,9 +553,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ━━━ 7. RENDER ENGINE ━━━
     function generateSlideHTML(page, isThumb = false, isPresenting = false) {
         if (!page || !page.elements) return '';
-        
+
         let html = '';
-        
+
         try {
             if (page.background && !isThumb) {
                 const slideContent = document.getElementById('mainSlideContent');
@@ -545,14 +563,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     slideContent.style.background = page.background;
                 }
             }
-            
+
             page.elements.forEach((el, index) => {
                 try {
-                    const w = el.width ? `width:${el.width}px;` : (el.type==='image'?'width:300px;':'width:auto;');
-                    const h = el.height ? `height:${el.height}px;` : (el.type==='image'?'height:300px;':'height:auto;');
+                    const w = el.width ? `width:${el.width}px;` : (el.type === 'image' ? 'width:300px;' : 'width:auto;');
+                    const h = el.height ? `height:${el.height}px;` : (el.type === 'image' ? 'height:300px;' : 'height:auto;');
                     const z = isThumb ? '' : `z-index:${index};`;
                     const rot = el.rotation ? `transform: rotate(${el.rotation}deg);` : '';
-                    
+
                     // Shadow and outline support
                     let shadowStyle = '';
                     if (el.shadow && el.shadow !== 'none') {
@@ -562,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             shadowStyle = `box-shadow: ${el.shadow};`;
                         }
                     }
-                    
+
                     let outlineStyle = '';
                     if (el.outline && el.outline !== 'none') {
                         if (el.type === 'text' || el.type === 'title') {
@@ -571,13 +589,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             outlineStyle = `outline: ${el.outline};`;
                         }
                     }
-                    
+
                     let classes = 'slide-element';
                     if (!isThumb) {
                         if (el.id === editingId) classes += ' editing';
                         else if (el.id === selectedId) classes += ' selected';
                     }
-                    
+
                     // Animation handling
                     if (isPresenting && el.animation && el.animation !== 'none' && features.animations) {
                         if (el.animation === 'transition') {
@@ -629,18 +647,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         inner = `<svg class="element-shape" width="100%" height="100%" viewBox="0 0 100 100"><polygon points="25,10 75,10 95,50 75,90 25,90 5,50" fill="${el.fill || '#3b82f6'}" stroke="${el.stroke || '#000000'}" stroke-width="${(el.strokeWidth || 2) / 2}"/></svg>`;
                     }
 
-                    html += `<div class="${classes}" id="${isThumb ? 'thumb_'+el.id : el.id}" data-id="${el.id}" style="${style}">
+                    html += `<div class="${classes}" id="${isThumb ? 'thumb_' + el.id : el.id}" data-id="${el.id}" style="${style}">
                         ${inner}
                         ${!isThumb && el.id === selectedId && el.id !== editingId ? getHandles() : ''}
                     </div>`;
-                } catch(e) {
+                } catch (e) {
                     console.error('Element render error:', e);
                 }
             });
-        } catch(e) {
+        } catch (e) {
             console.error('HTML generation error:', e);
         }
-        
+
         return html;
     }
 
@@ -666,7 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             renderSidebar();
             renderMain();
-        } catch(e) {
+        } catch (e) {
             console.error('Render error:', e);
             showNotification('Rendering error', 'error');
         }
@@ -674,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSidebar() {
         if (!slideStrip) return;
-        
+
         try {
             slideStrip.innerHTML = "";
             currentDeck.pages.forEach((page, index) => {
@@ -682,25 +700,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     const wrap = document.createElement('div');
                     wrap.className = 'slide-wrapper';
 
-                    const menuHTML = `
+                    const controlsHTML = `
                         <div class="slide-controls">
                             <button class="slide-control-btn" data-action="moveUp" data-index="${index}" title="Move Up">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
                                 </svg>
                             </button>
                             <button class="slide-control-btn" data-action="moveDown" data-index="${index}" title="Move Down">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
                                 </svg>
                             </button>
                             <button class="slide-control-btn" data-action="duplicate" data-index="${index}" title="Duplicate">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                                 </svg>
                             </button>
                             <button class="slide-control-btn delete" data-action="delete" data-index="${index}" title="Delete">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                 </svg>
                             </button>
@@ -708,66 +726,68 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
 
                     const bgStyle = page.background ? `background: ${page.background};` : '';
-                    
-                    // FIXED: Maintain aspect ratio in thumbnails
+
+                    wrap.className = 'slide-wrap';
                     wrap.innerHTML = `
                         <div class="slide-num">${index + 1}</div>
-                        <div class="slide-thumbnail ${index === activePageIndex ? 'active' : ''}">
-                            ${menuHTML}
-                            <div class="thumb-scaler" style="transform: scale(0.17); transform-origin: top left; width: 1280px; height: 720px; ${bgStyle}">
-                                ${generateSlideHTML(page, true)}
+                        <div style="flex:1;min-width:0;">
+                            <div class="slide-thumbnail ${index === activePageIndex ? 'active' : ''}">
+                                <div class="thumb-scaler" style="transform: scale(0.15); transform-origin: top left; width: 1280px; height: 720px; ${bgStyle}">
+                                    ${generateSlideHTML(page, true)}
+                                </div>
                             </div>
+                            ${controlsHTML}
                         </div>
                     `;
-                    
+
                     wrap.querySelectorAll('[data-action]').forEach(btn => {
                         btn.onclick = (e) => {
                             e.stopPropagation();
                             const action = btn.dataset.action;
                             const idx = parseInt(btn.dataset.index);
-                            
+
                             try {
                                 if (action === 'moveUp') moveSlidePage(idx, -1);
                                 else if (action === 'moveDown') moveSlidePage(idx, 1);
                                 else if (action === 'delete') deleteSlidePage(idx);
                                 else if (action === 'duplicate') duplicateSlidePage(idx);
-                            } catch(e) {
+                            } catch (e) {
                                 console.error('Slide action error:', e);
                                 showNotification('Action failed', 'error');
                             }
                         };
                     });
 
-                    wrap.querySelector('.slide-thumbnail').onclick = (e) => { 
-                        if(e.target.closest('button')) return;
-                        activePageIndex = index; 
-                        deselect(); 
-                        render(); 
+                    wrap.querySelector('.slide-thumbnail').onclick = (e) => {
+                        if (e.target.closest('button')) return;
+                        activePageIndex = index;
+                        deselect();
+                        render();
                     };
                     slideStrip.appendChild(wrap);
-                } catch(e) {
+                } catch (e) {
                     console.error('Thumbnail error:', e);
                 }
             });
-            
+
             const btn = document.createElement('div');
             btn.className = 'tool-btn';
             btn.innerHTML = '+';
             btn.style.cssText = "width:100%; border:1px dashed #333; margin-top:10px; cursor:pointer; display:grid; place-items:center;";
             btn.onclick = addNewPage;
             slideStrip.appendChild(btn);
-        } catch(e) {
+        } catch (e) {
             console.error('Sidebar error:', e);
         }
     }
 
     function renderMain() {
         if (!mainCanvas || !currentDeck.pages[activePageIndex]) return;
-        
+
         try {
             const page = currentDeck.pages[activePageIndex];
             const isPresenting = document.body.classList.contains('presenting');
-            
+
             mainCanvas.innerHTML = `
                 <div class="slide-content editor-scaler" id="mainSlideContent" style="background: ${page.background || 'white'}; width: 1280px; height: 720px; position: relative;">
                     ${generateSlideHTML(page, false, isPresenting)}
@@ -776,7 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fitCanvas();
             attachEvents();
             updateUI();
-        } catch(e) {
+        } catch (e) {
             console.error('Main render error:', e);
         }
     }
@@ -787,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (historyIndex < history.length - 1) {
             history = history.slice(0, historyIndex + 1);
         }
-        history.push(state); 
+        history.push(state);
         if (history.length > MAX_HISTORY) {
             history.shift();
         } else {
@@ -796,26 +816,26 @@ document.addEventListener('DOMContentLoaded', () => {
         debouncedSave();
     }
 
-    function undo() { 
-        if(historyIndex > 0) { 
-            historyIndex--; 
-            currentDeck = JSON.parse(history[historyIndex]); 
-            if(activePageIndex >= currentDeck.pages.length) {
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            currentDeck = JSON.parse(history[historyIndex]);
+            if (activePageIndex >= currentDeck.pages.length) {
                 activePageIndex = currentDeck.pages.length - 1;
             }
             deselect();
-            render(); 
-            save(); 
+            render();
+            save();
         }
     }
 
-    function redo() { 
-        if(historyIndex < history.length - 1) { 
-            historyIndex++; 
-            currentDeck = JSON.parse(history[historyIndex]); 
+    function redo() {
+        if (historyIndex < history.length - 1) {
+            historyIndex++;
+            currentDeck = JSON.parse(history[historyIndex]);
             deselect();
-            render(); 
-            save(); 
+            render();
+            save();
         }
     }
 
@@ -834,13 +854,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    function save() { 
-        const i = allDecks.findIndex(d => d.id == currentDeck.id); 
-        if(i !== -1) { 
-            allDecks[i] = currentDeck; 
+    function save() {
+        const i = allDecks.findIndex(d => d.id == currentDeck.id);
+        if (i !== -1) {
+            allDecks[i] = currentDeck;
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks)); 
-            } catch(e) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks));
+            } catch (e) {
                 console.error('Save failed:', e);
                 if (saveStatus) {
                     saveStatus.textContent = 'Failed!';
@@ -850,15 +870,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     showNotification('Storage full! Export project.', 'error');
                 }
             }
-        } 
+        }
     }
 
     pushHistory();
 
-// ━━━ CONTINUE TO PART 2 ━━━
-// ═══════════════════════════════════════════════════════════════════
-// PART 2 - Paste directly after Part 1
-// ═══════════════════════════════════════════════════════════════════
+    // ━━━ CONTINUE TO PART 2 ━━━
+    // ═══════════════════════════════════════════════════════════════════
+    // PART 2 - Paste directly after Part 1
+    // ═══════════════════════════════════════════════════════════════════
 
     // ━━━ 9. SLIDE MANAGEMENT ━━━
     function moveSlidePage(index, dir) {
@@ -867,11 +887,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const temp = currentDeck.pages[index];
                 currentDeck.pages[index] = currentDeck.pages[index + dir];
                 currentDeck.pages[index + dir] = temp;
-                activePageIndex = index + dir; 
-                pushHistory(); 
+                activePageIndex = index + dir;
+                pushHistory();
                 render();
             }
-        } catch(e) {
+        } catch (e) {
             console.error('Move error:', e);
             showNotification('Move failed', 'error');
         }
@@ -884,14 +904,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (!confirm(`Delete slide ${index + 1}?`)) return;
-            
+
             currentDeck.pages.splice(index, 1);
             if (activePageIndex >= currentDeck.pages.length) {
                 activePageIndex = currentDeck.pages.length - 1;
             }
-            pushHistory(); 
+            pushHistory();
             render();
-        } catch(e) {
+        } catch (e) {
             console.error('Delete error:', e);
             showNotification('Delete failed', 'error');
         }
@@ -909,7 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activePageIndex = index + 1;
             pushHistory();
             render();
-        } catch(e) {
+        } catch (e) {
             console.error('Duplicate error:', e);
             showNotification('Duplicate failed', 'error');
         }
@@ -918,26 +938,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function addNewPage() {
         try {
             currentDeck.pages.push({
-                id: 'p' + Date.now(), 
+                id: 'p' + Date.now(),
                 background: '#ffffff',
                 elements: [{
-                    id: 't' + Date.now(), 
-                    type: 'title', 
-                    text: 'Title', 
-                    x: 100, 
-                    y: 100, 
-                    fontSize: 60, 
-                    width: 600, 
-                    fontFamily: 'Inter, sans-serif', 
-                    fontWeight: 'bold', 
+                    id: 't' + Date.now(),
+                    type: 'title',
+                    text: 'Title',
+                    x: 100,
+                    y: 100,
+                    fontSize: 60,
+                    width: 600,
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 'bold',
                     color: '#000',
                     textAlign: 'left'
                 }]
-            }); 
-            pushHistory(); 
-            activePageIndex = currentDeck.pages.length - 1; 
+            });
+            pushHistory();
+            activePageIndex = currentDeck.pages.length - 1;
             render();
-        } catch(e) {
+        } catch (e) {
             console.error('Add slide error:', e);
             showNotification('Add failed', 'error');
         }
@@ -1038,16 +1058,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             content.onmousedown = (e) => {
-                if (e.target === content) { 
-                    if(activeTool === 'text') createText(e); 
-                    else deselect(); 
+                if (e.target === content) {
+                    if (activeTool === 'text') createText(e);
+                    else deselect();
                 }
             };
 
             if (isTouchDevice) {
                 content.ontouchstart = (e) => {
-                    if (e.target === content && e.touches.length === 1) { 
-                        if(activeTool === 'text') {
+                    if (e.target === content && e.touches.length === 1) {
+                        if (activeTool === 'text') {
                             const touch = e.touches[0];
                             createText({ clientX: touch.clientX, clientY: touch.clientY });
                         } else {
@@ -1059,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentDeck.pages[activePageIndex].elements.forEach(el => {
                 const dom = document.getElementById(el.id);
-                if(!dom) return;
+                if (!dom) return;
 
                 try {
                     if (features.contextMenu) {
@@ -1087,10 +1107,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    if(el.type !== 'image' && !['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
-                        dom.ondblclick = (e) => { 
-                            e.stopPropagation(); 
-                            enterEditMode(el.id); 
+                    if (el.type !== 'image' && !['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
+                        dom.ondblclick = (e) => {
+                            e.stopPropagation();
+                            enterEditMode(el.id);
                         };
                     }
 
@@ -1098,22 +1118,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (editingId === el.id && e.target.classList.contains('element-text')) {
                             return;
                         }
-                        
+
                         if (activeTool !== 'select' || editingId === el.id) return;
                         e.stopPropagation();
 
                         const handle = e.target.closest('[data-dir]');
-                        if(handle) { 
-                            e.preventDefault(); 
-                            if(handle.dataset.dir === 'rotate') {
+                        if (handle) {
+                            e.preventDefault();
+                            if (handle.dataset.dir === 'rotate') {
                                 startRotate(e, dom, el);
                             } else {
                                 startResize(e, dom, el, handle.dataset.dir);
                             }
-                            return; 
+                            return;
                         }
 
-                        if(selectedId !== el.id) select(el.id); 
+                        if (selectedId !== el.id) select(el.id);
                         initDrag(e, dom, el);
                     };
 
@@ -1122,31 +1142,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         dom.addEventListener('touchstart', (e) => {
                             if (e.touches.length !== 1) return;
                             if (activeTool !== 'select' || editingId === el.id) return;
-                            
+
                             e.stopPropagation();
                             e.preventDefault();
-                            
+
                             const touch = e.touches[0];
                             const handle = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-dir]');
-                            
+
                             if (handle) {
-                                if(handle.dataset.dir === 'rotate') {
+                                if (handle.dataset.dir === 'rotate') {
                                     startRotate({ clientX: touch.clientX, clientY: touch.clientY }, dom, el);
                                 } else {
                                     startResize({ clientX: touch.clientX, clientY: touch.clientY }, dom, el, handle.dataset.dir);
                                 }
                                 return;
                             }
-                            
-                            if(selectedId !== el.id) select(el.id);
+
+                            if (selectedId !== el.id) select(el.id);
                             initDrag({ clientX: touch.clientX, clientY: touch.clientY }, dom, el);
                         });
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error('Event attach error:', e);
                 }
             });
-        } catch(e) {
+        } catch (e) {
             console.error('Attach events error:', e);
         }
     }
@@ -1157,36 +1177,40 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { 
-            e.preventDefault(); 
-            undo(); 
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            undo();
         }
-        if((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { 
-            e.preventDefault(); 
-            redo(); 
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            redo();
         }
-        if((e.ctrlKey || e.metaKey) && e.key === 'd') { 
-            e.preventDefault(); 
-            duplicateElement(); 
+        if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+            e.preventDefault();
+            duplicateElement();
         }
-        if((e.key === 'Delete' || e.key === 'Backspace') && selectedId && !editingId) { 
-            e.preventDefault(); 
-            deleteSelected(); 
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && !editingId) {
+            e.preventDefault();
+            deleteSelected();
         }
-        if(e.key === 'Escape' && editingId) {
+        if (e.key === 'Escape' && editingId) {
             e.preventDefault();
             saveEditing();
         }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+            e.preventDefault();
+            addNewPage();
+        }
     }
 
-    function handleGlobalClick(e) { 
-        if(editingId) { 
-            const dom = document.getElementById(editingId); 
-            if(dom && !dom.contains(e.target) && !e.target.closest('#bottomBar')) {
-                saveEditing(); 
+    function handleGlobalClick(e) {
+        if (editingId) {
+            const dom = document.getElementById(editingId);
+            if (dom && !dom.contains(e.target) && !e.target.closest('#bottomBar')) {
+                saveEditing();
             }
         }
-        
+
         if (contextMenu && !e.target.closest('#contextMenu')) {
             contextMenu.classList.remove('visible');
         }
@@ -1196,27 +1220,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousedown', handleGlobalClick);
 
     // ━━━ 12. SELECTION & EDITING ━━━
-    function select(id) { 
-        selectedId = id; 
-        renderMain(); 
+    function select(id) {
+        selectedId = id;
+        renderMain();
     }
 
-    function deselect() { 
-        if(selectedId || editingId) { 
-            saveEditing(); 
-            selectedId = null; 
-            editingId = null; 
-            renderMain(); 
-        } 
+    function deselect() {
+        if (selectedId || editingId) {
+            saveEditing();
+            selectedId = null;
+            editingId = null;
+            renderMain();
+        }
     }
 
-    function deleteSelected() { 
+    function deleteSelected() {
         if (!selectedId) return;
-        const p = currentDeck.pages[activePageIndex]; 
-        p.elements = p.elements.filter(el => el.id !== selectedId); 
-        selectedId = null; 
-        pushHistory(); 
-        renderMain(); 
+        const p = currentDeck.pages[activePageIndex];
+        p.elements = p.elements.filter(el => el.id !== selectedId);
+        selectedId = null;
+        pushHistory();
+        renderMain();
         renderSidebar();
     }
 
@@ -1224,80 +1248,80 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selectedId) return;
         const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
         if (!el) return;
-        
+
         const clone = JSON.parse(JSON.stringify(el));
         clone.id = 'el' + Date.now();
         clone.x += 20;
         clone.y += 20;
-        
+
         currentDeck.pages[activePageIndex].elements.push(clone);
         pushHistory();
         render();
         select(clone.id);
     }
 
-    function enterEditMode(id) { 
-        if(editingId === id) return; 
-        saveEditing(); 
-        editingId = id; 
-        selectedId = id; 
-        renderMain(); 
-        const d = document.getElementById(id); 
+    function enterEditMode(id) {
+        if (editingId === id) return;
+        saveEditing();
+        editingId = id;
+        selectedId = id;
+        renderMain();
+        const d = document.getElementById(id);
         if (!d) return;
-        const i = d.querySelector('.element-text'); 
+        const i = d.querySelector('.element-text');
         if (i) {
-            i.focus(); 
+            i.focus();
             const range = document.createRange();
             range.selectNodeContents(i);
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(range);
         }
-        updateUI(); 
+        updateUI();
     }
 
-    function saveEditing() { 
-        if(!editingId) return; 
-        const d = document.getElementById(editingId); 
+    function saveEditing() {
+        if (!editingId) return;
+        const d = document.getElementById(editingId);
         if (!d) {
             editingId = null;
             return;
         }
-        const i = d.querySelector('.element-text'); 
-        const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === editingId); 
-        if(el && i) {
+        const i = d.querySelector('.element-text');
+        const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === editingId);
+        if (el && i) {
             el.text = i.innerText || 'Type here';
         }
-        editingId = null; 
-        pushHistory(); 
-        renderMain(); 
-        renderSidebar(); 
+        editingId = null;
+        pushHistory();
+        renderMain();
+        renderSidebar();
     }
 
     // ━━━ 13. ELEMENT CREATION ━━━
     function createText(e) {
         try {
-            const r = document.getElementById('mainSlideContent').getBoundingClientRect(); 
-            const x = (e.clientX - r.left) / currentScale; 
-            const y = (e.clientY - r.top) / currentScale; 
+            const r = document.getElementById('mainSlideContent').getBoundingClientRect();
+            const x = (e.clientX - r.left) / currentScale;
+            const y = (e.clientY - r.top) / currentScale;
             const n = {
-                id: 'el' + Date.now(), 
-                type: 'text', 
-                text: 'Type here', 
-                x: x, 
-                y: y, 
-                fontSize: 40, 
-                width: 250, 
-                height: 'auto', 
+                id: 'el' + Date.now(),
+                type: 'text',
+                text: 'Type here',
+                x: x,
+                y: y,
+                fontSize: 40,
+                width: 250,
+                height: 'auto',
                 ...currentTextStyle
-            }; 
-            currentDeck.pages[activePageIndex].elements.push(n); 
-            pushHistory(); 
-            renderMain(); 
-            select(n.id); 
-            setActiveTool('select'); 
+            };
+            currentDeck.pages[activePageIndex].elements.push(n);
+            pushHistory();
+            renderMain();
+            select(n.id);
+            setActiveTool('select');
             setTimeout(() => enterEditMode(n.id), 50);
-        } catch(e) {
+        } catch (e) {
             console.error('Create text error:', e);
             showNotification('Failed to create text', 'error');
         }
@@ -1319,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             render();
             select(shape.id);
             closeAllDropdowns();
-        } catch(e) {
+        } catch (e) {
             console.error('Create shape error:', e);
             showNotification('Failed to create shape', 'error');
         }
@@ -1330,209 +1354,218 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.round(value / gridSize) * gridSize;
     }
 
-    function initDrag(e, dom, data) { 
+    function initDrag(e, dom, data) {
         isDragging = true;
         const sX = e.clientX;
         const sY = e.clientY;
         const iX = data.x;
-        const iY = data.y; 
-        let frameId = null; 
-        
-        const mv = (ev) => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            frameId = requestAnimationFrame(() => { 
+        const iY = data.y;
+        let frameId = null;
+        let touchMvHandler = null;
+
+        const mv = (ev) => {
+            if (frameId) cancelAnimationFrame(frameId);
+            frameId = requestAnimationFrame(() => {
                 const dx = (ev.clientX - sX) / currentScale;
-                const dy = (ev.clientY - sY) / currentScale; 
+                const dy = (ev.clientY - sY) / currentScale;
                 const newX = snapToGrid(iX + dx);
                 const newY = snapToGrid(iY + dy);
-                dom.style.left = newX + 'px'; 
-                dom.style.top = newY + 'px'; 
-                data.x = newX; 
-                data.y = newY; 
-            }); 
-        }; 
-        
-        const up = () => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            window.removeEventListener('mousemove', mv); 
-            window.removeEventListener('mouseup', up); 
-            window.removeEventListener('touchmove', touchMv);
+                dom.style.left = newX + 'px';
+                dom.style.top = newY + 'px';
+                data.x = newX;
+                data.y = newY;
+            });
+        };
+
+        const up = () => {
+            if (frameId) cancelAnimationFrame(frameId);
+            window.removeEventListener('mousemove', mv);
+            window.removeEventListener('mouseup', up);
+            if (touchMvHandler) {
+                window.removeEventListener('touchmove', touchMvHandler);
+            }
             window.removeEventListener('touchend', up);
             isDragging = false;
-            pushHistory(); 
-            renderSidebar(); 
-        }; 
-        
-        window.addEventListener('mousemove', mv); 
+            pushHistory();
+            renderSidebar();
+        };
+
+        window.addEventListener('mousemove', mv);
         window.addEventListener('mouseup', up);
-        
+
         if (isTouchDevice) {
-            const touchMv = (ev) => {
+            touchMvHandler = (ev) => {
                 if (ev.touches.length === 1) {
                     ev.preventDefault();
                     mv({ clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY });
                 }
             };
-            window.addEventListener('touchmove', touchMv, { passive: false });
+            window.addEventListener('touchmove', touchMvHandler, { passive: false });
             window.addEventListener('touchend', up);
         }
     }
 
-    function startResize(e, dom, data, dir) { 
+    function startResize(e, dom, data, dir) {
         isDragging = true;
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        
+        e.preventDefault();
+        e.stopPropagation();
+
         const sX = e.clientX;
         const sY = e.clientY;
         const sW = dom.offsetWidth;
         const sH = dom.offsetHeight;
         const sL = data.x;
         const sT = data.y;
-        const r = sW / sH; 
-        let frameId = null; 
-        
-        const mv = (ev) => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            frameId = requestAnimationFrame(() => { 
+        const r = sW / sH;
+        let frameId = null;
+        let touchMvHandler = null;
+
+        const mv = (ev) => {
+            if (frameId) cancelAnimationFrame(frameId);
+            frameId = requestAnimationFrame(() => {
                 const dx = (ev.clientX - sX) / currentScale;
-                const dy = (ev.clientY - sY) / currentScale; 
+                const dy = (ev.clientY - sY) / currentScale;
                 let nW = sW;
                 let nH = sH;
                 let nL = sL;
-                let nT = sT; 
-                
-                if(dir.includes('e')) nW = sW + dx; 
-                if(dir.includes('s')) nH = sH + dy; 
-                if(dir.includes('w')) { 
-                    nW = sW - dx; 
-                    nL = sL + dx; 
-                } 
-                if(dir.includes('n')) { 
-                    nH = sH - dy; 
-                    nT = sT + dy; 
-                } 
-                
-                const lock = (data.type === 'image' || data.type === 'circle') ? !ev.shiftKey : ev.shiftKey; 
-                if(lock) { 
-                    if(dir.includes('e') || dir.includes('w')) { 
-                        nH = nW / r; 
-                        if(dir.includes('n')) nT = sT + (sH - nH); 
-                    } else { 
-                        nW = nH * r; 
-                        if(dir.includes('w')) nL = sL + (sW - nW); 
-                    } 
-                } 
-                
+                let nT = sT;
+
+                if (dir.includes('e')) nW = sW + dx;
+                if (dir.includes('s')) nH = sH + dy;
+                if (dir.includes('w')) {
+                    nW = sW - dx;
+                    nL = sL + dx;
+                }
+                if (dir.includes('n')) {
+                    nH = sH - dy;
+                    nT = sT + dy;
+                }
+
+                const lock = (data.type === 'image' || data.type === 'circle') ? !ev.shiftKey : ev.shiftKey;
+                if (lock) {
+                    if (dir.includes('e') || dir.includes('w')) {
+                        nH = nW / r;
+                        if (dir.includes('n')) nT = sT + (sH - nH);
+                    } else {
+                        nW = nH * r;
+                        if (dir.includes('w')) nL = sL + (sW - nW);
+                    }
+                }
+
                 nW = Math.max(20, nW);
                 nH = Math.max(20, nH);
-                
-                dom.style.width = nW + 'px'; 
-                dom.style.height = nH + 'px'; 
-                dom.style.left = nL + 'px'; 
-                dom.style.top = nT + 'px'; 
-                data.width = nW; 
-                data.height = nH; 
-                data.x = nL; 
-                data.y = nT; 
-            }); 
-        }; 
-        
-        const up = () => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            window.removeEventListener('mousemove', mv); 
+
+                dom.style.width = nW + 'px';
+                dom.style.height = nH + 'px';
+                dom.style.left = nL + 'px';
+                dom.style.top = nT + 'px';
+                data.width = nW;
+                data.height = nH;
+                data.x = nL;
+                data.y = nT;
+            });
+        };
+
+        const up = () => {
+            if (frameId) cancelAnimationFrame(frameId);
+            window.removeEventListener('mousemove', mv);
             window.removeEventListener('mouseup', up);
-            window.removeEventListener('touchmove', touchMv);
+            if (touchMvHandler) {
+                window.removeEventListener('touchmove', touchMvHandler);
+            }
             window.removeEventListener('touchend', up);
             isDragging = false;
-            pushHistory(); 
-            renderSidebar(); 
-        }; 
-        
-        window.addEventListener('mousemove', mv); 
+            pushHistory();
+            renderSidebar();
+        };
+
+        window.addEventListener('mousemove', mv);
         window.addEventListener('mouseup', up);
-        
+
         if (isTouchDevice) {
-            const touchMv = (ev) => {
+            touchMvHandler = (ev) => {
                 if (ev.touches.length === 1) {
                     ev.preventDefault();
                     mv({ clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY });
                 }
             };
-            window.addEventListener('touchmove', touchMv, { passive: false });
+            window.addEventListener('touchmove', touchMvHandler, { passive: false });
             window.addEventListener('touchend', up);
         }
     }
 
-    function startRotate(e, dom, data) { 
+    function startRotate(e, dom, data) {
         isDragging = true;
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        
+        e.preventDefault();
+        e.stopPropagation();
+
         const r = dom.getBoundingClientRect();
         const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2; 
-        let frameId = null; 
-        
-        const mv = (ev) => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            frameId = requestAnimationFrame(() => { 
+        const cy = r.top + r.height / 2;
+        let frameId = null;
+        let touchMvHandler = null;
+
+        const mv = (ev) => {
+            if (frameId) cancelAnimationFrame(frameId);
+            frameId = requestAnimationFrame(() => {
                 const angle = Math.atan2(ev.clientY - cy, ev.clientX - cx);
-                const deg = (angle * (180 / Math.PI) + 90) % 360; 
-                dom.style.transform = `rotate(${deg}deg)`; 
-                data.rotation = deg; 
-            }); 
-        }; 
-        
-        const up = () => { 
-            if(frameId) cancelAnimationFrame(frameId); 
-            window.removeEventListener('mousemove', mv); 
+                const deg = (angle * (180 / Math.PI) + 90) % 360;
+                dom.style.transform = `rotate(${deg}deg)`;
+                data.rotation = deg;
+            });
+        };
+
+        const up = () => {
+            if (frameId) cancelAnimationFrame(frameId);
+            window.removeEventListener('mousemove', mv);
             window.removeEventListener('mouseup', up);
-            window.removeEventListener('touchmove', touchMv);
+            if (touchMvHandler) {
+                window.removeEventListener('touchmove', touchMvHandler);
+            }
             window.removeEventListener('touchend', up);
             isDragging = false;
-            pushHistory(); 
-            renderSidebar(); 
-        }; 
-        
-        window.addEventListener('mousemove', mv); 
+            pushHistory();
+            renderSidebar();
+        };
+
+        window.addEventListener('mousemove', mv);
         window.addEventListener('mouseup', up);
-        
+
         if (isTouchDevice) {
-            const touchMv = (ev) => {
+            touchMvHandler = (ev) => {
                 if (ev.touches.length === 1) {
                     ev.preventDefault();
                     mv({ clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY });
                 }
             };
-            window.addEventListener('touchmove', touchMv, { passive: false });
+            window.addEventListener('touchmove', touchMvHandler, { passive: false });
             window.addEventListener('touchend', up);
         }
     }
 
-// ━━━ CONTINUE TO PART 3 ━━━
+    // ━━━ CONTINUE TO PART 3 ━━━
 
-// ═══════════════════════════════════════════════════════════════════
-// PART 3 - Paste directly after Part 2
-// Final part with all remaining features!
-// ═══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════
+    // PART 3 - Paste directly after Part 2
+    // Final part with all remaining features!
+    // ═══════════════════════════════════════════════════════════════════
 
     // ━━━ 15. FORMATTING UI (25 FONTS + SHADOW/OUTLINE) ━━━
     function updateUI() {
         if (!bottomBar) return;
-        
-        if (!selectedId) { 
-            bottomBar.classList.add('hidden'); 
-            return; 
+
+        if (!selectedId) {
+            bottomBar.classList.add('hidden');
+            return;
         }
-        
+
         bottomBar.classList.remove('hidden');
         const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
         if (!el) return;
-        
+
         let html = '';
-        
-        if(el.type === 'text' || el.type === 'title') {
+
+        if (el.type === 'text' || el.type === 'title') {
             html += `
                 <select id="fontFamily" class="font-select">
                     <option value="Inter, sans-serif">Inter</option>
@@ -1628,8 +1661,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="toolbar-divider"></div>
             `;
         }
-        
+
         html += `
+            <div class="toolbar-divider"></div>
+            <select id="animSelect" class="font-select" style="width: 110px;" title="Animation">
+                <option value="none">No Animation</option>
+                <option value="appear">Appear</option>
+                <option value="fly-left">Fly Left</option>
+                <option value="fly-right">Fly Right</option>
+                <option value="fly-top">Fly Top</option>
+                <option value="fly-bottom">Fly Bottom</option>
+                <option value="bounce">Bounce</option>
+                <option value="pulse">Pulse</option>
+            </select>
+            <div class="toolbar-divider"></div>
             <button class="format-btn" id="btnLayerBack" title="Send Back">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 16l-6-6 1.41-1.41L12 13.17l4.59-4.58L18 10z"/>
@@ -1641,61 +1686,86 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>
             </button>
         `;
-        
+
         bottomBar.innerHTML = html;
 
         // Attach listeners
-        if(el.type === 'text' || el.type === 'title') {
+        if (el.type === 'text' || el.type === 'title') {
             const fontSel = document.getElementById('fontFamily');
             if (fontSel) {
                 fontSel.value = el.fontFamily || 'Inter, sans-serif';
                 fontSel.onchange = (e) => setProp('fontFamily', e.target.value);
             }
-            
-            // FIXED: Font size input maintains focus
+
+            // FIXED v3: Font size uses number input with Enter to apply
             const fontSizeInput = document.getElementById('fontSize');
             if (fontSizeInput) {
-                fontSizeInput.onchange = (e) => {
-                    const val = parseInt(e.target.value);
-                    if (!isNaN(val) && val >= 8 && val <= 200) {
-                        setProp('fontSize', val);
-                    }
+                let pendingSize = null;
+                fontSizeInput.oninput = (e) => {
+                    pendingSize = parseInt(e.target.value);
                 };
                 fontSizeInput.onkeydown = (e) => {
                     e.stopPropagation();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= 8 && val <= 200) {
+                            setProp('fontSize', val);
+                        }
+                    }
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const cur = parseInt(e.target.value) || 40;
+                        const next = Math.min(200, cur + 2);
+                        e.target.value = next;
+                        setProp('fontSize', next);
+                    }
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const cur = parseInt(e.target.value) || 40;
+                        const next = Math.max(8, cur - 2);
+                        e.target.value = next;
+                        setProp('fontSize', next);
+                    }
+                };
+                fontSizeInput.onblur = (e) => {
+                    if (pendingSize !== null && !isNaN(pendingSize) && pendingSize >= 8 && pendingSize <= 200) {
+                        setProp('fontSize', pendingSize);
+                        pendingSize = null;
+                    }
                 };
                 fontSizeInput.onfocus = (e) => {
                     e.target.select();
                 };
             }
-            
+
             const colorInput = document.getElementById('textColor');
             if (colorInput) colorInput.oninput = (e) => setProp('color', e.target.value);
-            
+
             const btnBold = document.getElementById('btnBold');
             if (btnBold) btnBold.onclick = () => togProp('fontWeight', 'bold', 'normal');
-            
+
             const btnItalic = document.getElementById('btnItalic');
             if (btnItalic) btnItalic.onclick = () => togProp('fontStyle', 'italic', 'normal');
-            
+
             const btnUnderline = document.getElementById('btnUnderline');
             if (btnUnderline) btnUnderline.onclick = () => togProp('textDecoration', 'underline', 'none');
-            
+
             const btnAlignLeft = document.getElementById('btnAlignLeft');
             if (btnAlignLeft) btnAlignLeft.onclick = () => setProp('textAlign', 'left');
-            
+
             const btnAlignCenter = document.getElementById('btnAlignCenter');
             if (btnAlignCenter) btnAlignCenter.onclick = () => setProp('textAlign', 'center');
-            
+
             const btnAlignRight = document.getElementById('btnAlignRight');
             if (btnAlignRight) btnAlignRight.onclick = () => setProp('textAlign', 'right');
-            
+
             const shadowSelect = document.getElementById('shadowSelect');
             if (shadowSelect) {
                 shadowSelect.value = el.shadow || 'none';
                 shadowSelect.onchange = (e) => setProp('shadow', e.target.value);
             }
-            
+
             const outlineSelect = document.getElementById('outlineSelect');
             if (outlineSelect) {
                 outlineSelect.value = el.outline || 'none';
@@ -1704,16 +1774,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (['rect', 'circle', 'line', 'triangle', 'arrow', 'star', 'heart', 'diamond', 'hexagon'].includes(el.type)) {
             const fillColor = document.getElementById('fillColor');
             if (fillColor) fillColor.oninput = (e) => setProp('fill', e.target.value);
-            
+
             const strokeColor = document.getElementById('strokeColor');
             if (strokeColor) strokeColor.oninput = (e) => setProp('stroke', e.target.value);
-            
+
             const strokeWidth = document.getElementById('strokeWidth');
             if (strokeWidth) {
                 strokeWidth.onchange = (e) => setProp('strokeWidth', parseInt(e.target.value) || 2);
                 strokeWidth.onkeydown = (e) => e.stopPropagation();
             }
-            
+
             const shadowSelect = document.getElementById('shadowSelect');
             if (shadowSelect) {
                 shadowSelect.value = el.shadow || 'none';
@@ -1731,6 +1801,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnBack = document.getElementById('btnLayerBack');
         if (btnFront) btnFront.onclick = () => moveLayer(1);
         if (btnBack) btnBack.onclick = () => moveLayer(-1);
+
+        const animSelect = document.getElementById('animSelect');
+        if (animSelect) {
+            animSelect.value = el.animation || 'none';
+            animSelect.onchange = (e) => setProp('animation', e.target.value);
+        }
     }
 
     function moveLayer(dir) {
@@ -1738,39 +1814,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const els = currentDeck.pages[activePageIndex].elements;
         const idx = els.findIndex(e => e.id === selectedId);
         if (idx === -1) return;
-        
+
         if ((dir === 1 && idx < els.length - 1) || (dir === -1 && idx > 0)) {
             const temp = els[idx];
             els[idx] = els[idx + dir];
             els[idx + dir] = temp;
-            pushHistory(); 
+            pushHistory();
             renderMain();
         }
     }
 
-    const setProp = (k, v) => { 
-        if(selectedId) { 
-            const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId); 
+    const setProp = (k, v) => {
+        if (selectedId) {
+            const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
             if (el) {
-                el[k] = v; 
-                pushHistory(); 
-                renderMain(); 
+                el[k] = v;
+                pushHistory();
+                renderMain();
                 renderSidebar();
             }
-        } 
+        }
     };
 
-    const togProp = (k, a, b) => { 
-        if(selectedId) { 
-            const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId); 
+    const togProp = (k, a, b) => {
+        if (selectedId) {
+            const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
             if (el) {
-                el[k] = (el[k] === a) ? b : a; 
-                pushHistory(); 
-                renderMain(); 
+                el[k] = (el[k] === a) ? b : a;
+                pushHistory();
+                renderMain();
                 renderSidebar();
-                updateUI(); 
+                updateUI();
             }
-        } 
+        }
     };
 
     // ━━━ 16. CONTEXT MENU (FIXED ANIMATIONS SUBMENU) ━━━
@@ -1787,11 +1863,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (y + menuRect.height > window.innerHeight) {
                 finalY = window.innerHeight - menuRect.height - 10;
             }
-            
+
             contextMenu.style.left = finalX + 'px';
             contextMenu.style.top = finalY + 'px';
             contextMenu.classList.add('visible');
-        } catch(e) {
+        } catch (e) {
             console.error('Context menu error:', e);
         }
     }
@@ -1830,156 +1906,157 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // FIXED: Animation submenu
-        document.querySelectorAll('[data-animation]').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const animation = item.dataset.animation;
-                if (selectedId) {
-                    const el = currentDeck.pages[activePageIndex].elements.find(e => e.id === selectedId);
-                    if (el) {
-                        // Check for transition animation
-                        if (animation === 'transition') {
-                            // Find element in next slide with same ID (from duplicate slide)
-                            if (activePageIndex < currentDeck.pages.length - 1) {
-                                const nextPage = currentDeck.pages[activePageIndex + 1];
-                                const nextEl = nextPage.elements.find(e => e.type === el.type && Math.abs(e.x - el.x) < 1000);
-                                if (nextEl) {
-                                    el.animation = 'transition';
-                                    el.transitionTo = { x: nextEl.x, y: nextEl.y };
-                                } else {
-                                    showNotification('No matching element found on next slide', 'error');
-                                }
-                            } else {
-                                showNotification('No next slide for transition', 'error');
-                            }
-                        } else {
-                            el.animation = animation;
-                        }
-                        pushHistory();
-                        renderSidebar();
-                    }
-                }
-                contextMenu.classList.remove('visible');
-            });
-        });
-    } catch(e) {
+        // Context menu animation handlers removed — animations now in bottom bar
+    } catch (e) {
         console.error('Context menu setup error:', e);
         features.contextMenu = false;
     }
 
     // ━━━ 17. CANVAS SCALING ━━━
-    function fitCanvas() { 
-        if(document.body.classList.contains('presenting')) return; 
-        
-        const c = document.getElementById('mainSlideContent'); 
-        const a = document.querySelector('.canvas-area'); 
-        if(!c || !a) return; 
-        
+    function fitCanvas() {
+        if (document.body.classList.contains('presenting')) return;
+
+        const c = document.getElementById('mainSlideContent');
+        const a = document.querySelector('.canvas-area');
+        if (!c || !a) return;
+
         const scaleX = (a.clientWidth - 40) / 1280;
         const scaleY = (a.clientHeight - 40) / 720;
-        currentScale = Math.min(scaleX, scaleY); 
-        c.style.transform = `scale(${currentScale})`; 
+        currentScale = Math.min(scaleX, scaleY);
+        c.style.transform = `scale(${currentScale})`;
     }
-    
+
     window.addEventListener('resize', fitCanvas);
 
     // ━━━ 18. PRESENTATION MODE (FIXED ASPECT RATIO) ━━━
     if (presentBtn) {
-        presentBtn.onclick = () => { 
-            document.body.classList.add('presenting'); 
+        presentBtn.onclick = () => {
+            document.body.classList.add('presenting');
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(err => {
                     console.log('Fullscreen error:', err);
                 });
             }
-            deselect(); 
+            deselect();
             panOffsetX = 0;
             panOffsetY = 0;
-            document.addEventListener('keydown', handlePresentNav); 
-            
-            const s = document.querySelector('.editor-shell'); 
-            if (s) {
-                s.style.justifyContent = 'center'; 
-                s.style.alignItems = 'center'; 
-            }
-            
+            if (mainCanvas) mainCanvas.style.transform = '';
+            document.addEventListener('keydown', handlePresentNav);
+
+            // Add click-to-advance
+            const clickHandler = (e) => {
+                if (e.target.closest('#presentSlideCounter')) return;
+                if (activePageIndex < currentDeck.pages.length - 1) {
+                    activePageIndex++;
+                    renderMain();
+                    refreshFullScale();
+                    updateSlideCounter();
+                }
+            };
+            canvasArea.addEventListener('click', clickHandler);
+            canvasArea._presentClickHandler = clickHandler;
+
             renderMain();
-            
-            const c = document.getElementById('mainSlideContent'); 
+
+            const c = document.getElementById('mainSlideContent');
             if (c) {
-                // FIXED: Maintain 16:9 aspect ratio
-                c.style.position = 'static'; 
-                c.style.margin = 'auto';
                 c.style.width = '1280px';
                 c.style.height = '720px';
-                const sw = window.innerWidth / 1280; 
-                const sh = window.innerHeight / 720; 
-                c.style.transform = `scale(${Math.min(sw, sh)})`; 
+                const sw = window.innerWidth / 1280;
+                const sh = window.innerHeight / 720;
+                c.style.transform = `scale(${Math.min(sw, sh)})`;
                 c.style.transformOrigin = 'center center';
             }
+
+            // Add slide counter
+            let counter = document.getElementById('presentSlideCounter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.id = 'presentSlideCounter';
+                counter.className = 'present-slide-counter';
+                document.body.appendChild(counter);
+            }
+            updateSlideCounter();
         };
     }
 
-    function handlePresentNav(e) { 
-        if(e.key === 'ArrowRight' || e.key === ' ') { 
+    function handlePresentNav(e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
             e.preventDefault();
-            if(activePageIndex < currentDeck.pages.length - 1) {
-                activePageIndex++; 
-                renderMain(); 
+            if (activePageIndex < currentDeck.pages.length - 1) {
+                activePageIndex++;
+                renderMain();
                 refreshFullScale();
+                updateSlideCounter();
             }
-        } else if(e.key === 'ArrowLeft') { 
+        } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            if(activePageIndex > 0) {
-                activePageIndex--; 
-                renderMain(); 
+            if (activePageIndex > 0) {
+                activePageIndex--;
+                renderMain();
                 refreshFullScale();
+                updateSlideCounter();
             }
-        } else if(e.key === 'Escape') {
+        } else if (e.key === 'Escape') {
             e.preventDefault();
-            exitPresentation(); 
+            exitPresentation();
         }
     }
 
-    function exitPresentation() { 
-        if(document.fullscreenElement) {
+    function updateSlideCounter() {
+        const counter = document.getElementById('presentSlideCounter');
+        if (counter) {
+            counter.textContent = `${activePageIndex + 1} / ${currentDeck.pages.length}`;
+        }
+    }
+
+    function exitPresentation() {
+        if (document.fullscreenElement) {
             document.exitFullscreen();
         }
-        document.body.classList.remove('presenting'); 
-        document.removeEventListener('keydown', handlePresentNav); 
-        
-        const s = document.querySelector('.editor-shell'); 
-        if (s) {
-            s.style.justifyContent = ''; 
-            s.style.alignItems = ''; 
+        document.body.classList.remove('presenting');
+        document.removeEventListener('keydown', handlePresentNav);
+
+        // Remove click-to-advance handler
+        if (canvasArea && canvasArea._presentClickHandler) {
+            canvasArea.removeEventListener('click', canvasArea._presentClickHandler);
+            delete canvasArea._presentClickHandler;
         }
-        
-        const c = document.getElementById('mainSlideContent'); 
+
+        // Remove slide counter
+        const counter = document.getElementById('presentSlideCounter');
+        if (counter) counter.remove();
+
+        const c = document.getElementById('mainSlideContent');
         if (c) {
-            c.style.position = 'relative'; 
-            c.style.margin = ''; 
+            c.style.position = 'relative';
+            c.style.margin = '';
             c.style.width = '1280px';
             c.style.height = '720px';
-            c.style.transformOrigin = 'top left';
+            c.style.transformOrigin = 'center center';
         }
-        
-        fitCanvas(); 
+
+        if (mainCanvas) mainCanvas.style.transform = '';
+        panOffsetX = 0;
+        panOffsetY = 0;
+
+        render();
+        fitCanvas();
     }
 
-    function refreshFullScale() { 
-        const c = document.getElementById('mainSlideContent'); 
+    function refreshFullScale() {
+        const c = document.getElementById('mainSlideContent');
         if (!c) return;
         c.style.width = '1280px';
         c.style.height = '720px';
-        const sw = window.innerWidth / 1280; 
-        const sh = window.innerHeight / 720; 
-        c.style.transform = `scale(${Math.min(sw, sh)})`; 
+        const sw = window.innerWidth / 1280;
+        const sh = window.innerHeight / 720;
+        c.style.transform = `scale(${Math.min(sw, sh)})`;
         c.style.transformOrigin = 'center center';
     }
 
-    document.addEventListener('fullscreenchange', () => { 
-        if(!document.fullscreenElement) exitPresentation(); 
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) exitPresentation();
     });
 
     // ━━━ 19. TOOLBAR TOOLS ━━━
@@ -1999,52 +2076,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function setActiveTool(t, b) { 
-        activeTool = t; 
-        document.querySelectorAll('.tool-btn').forEach(x => x.classList.remove('active')); 
-        
-        if(b) {
+    function setActiveTool(t, b) {
+        activeTool = t;
+        document.querySelectorAll('.tool-btn').forEach(x => x.classList.remove('active'));
+
+        if (b) {
             b.classList.add('active');
-        } else if(t === 'select') {
+        } else if (t === 'select') {
             const selectBtn = document.getElementById('selectTool');
             if (selectBtn) selectBtn.classList.add('active');
         }
-        
+
         const content = document.getElementById('mainSlideContent');
         if (content) {
-            content.style.cursor = t === 'text' ? 'text' : 'default'; 
+            content.style.cursor = t === 'text' ? 'text' : 'default';
         }
-        
-        if(t === 'text') deselect(); 
+
+        if (t === 'text') deselect();
     }
 
     // ━━━ 20. IMAGE UPLOAD ━━━
     if (imgInput) {
-        imgInput.onchange = (e) => { 
-            if(e.target.files[0]) {
+        imgInput.onchange = (e) => {
+            if (e.target.files[0]) {
                 if (e.target.files[0].size > 5 * 1024 * 1024) {
                     showNotification('Image too large (max 5MB)', 'error');
                     e.target.value = '';
                     return;
                 }
-                
-                const r = new FileReader(); 
-                r.onload = (ev) => { 
+
+                const r = new FileReader();
+                r.onload = (ev) => {
                     const n = {
-                        id: 'img' + Date.now(), 
-                        type: 'image', 
-                        src: ev.target.result, 
-                        x: 100, 
-                        y: 100, 
-                        width: 400, 
+                        id: 'img' + Date.now(),
+                        type: 'image',
+                        src: ev.target.result,
+                        x: 100,
+                        y: 100,
+                        width: 400,
                         height: 300
-                    }; 
-                    currentDeck.pages[activePageIndex].elements.push(n); 
-                    pushHistory(); 
-                    render(); 
+                    };
+                    currentDeck.pages[activePageIndex].elements.push(n);
+                    pushHistory();
+                    render();
                     select(n.id);
-                }; 
-                r.readAsDataURL(e.target.files[0]); 
+                };
+                r.readAsDataURL(e.target.files[0]);
             }
             e.target.value = '';
         };
@@ -2052,31 +2129,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ━━━ 21. TITLE EDITING ━━━
     if (titleElement) {
-        titleElement.ondblclick = () => { 
-            const i = document.createElement('input'); 
-            i.value = currentDeck.title; 
-            i.style.cssText = "background:#222; border:1px solid #444; color:white; font-size:1rem; padding:4px; border-radius:4px;"; 
-            titleElement.replaceWith(i); 
-            i.focus(); 
+        titleElement.ondblclick = () => {
+            const i = document.createElement('input');
+            i.value = currentDeck.title;
+            i.style.cssText = "background:#222; border:1px solid #444; color:white; font-size:1rem; padding:4px; border-radius:4px;";
+            titleElement.replaceWith(i);
+            i.focus();
             i.select();
-            
+
             const s = () => {
-                currentDeck.title = i.value || "Untitled"; 
-                save(); 
-                titleElement.innerText = currentDeck.title; 
+                currentDeck.title = i.value || "Untitled";
+                save();
+                titleElement.innerText = currentDeck.title;
                 i.replaceWith(titleElement);
-            }; 
-            
-            i.onblur = s; 
+            };
+
+            i.onblur = s;
             i.onkeydown = (e) => {
-                if(e.key === 'Enter') {
+                if (e.key === 'Enter') {
                     e.preventDefault();
                     s();
-                } else if(e.key === 'Escape') {
+                } else if (e.key === 'Escape') {
                     titleElement.innerText = currentDeck.title;
                     i.replaceWith(titleElement);
                 }
-            }; 
+            };
         };
     }
 
@@ -2113,7 +2190,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             document.body.appendChild(loader);
-        } catch(e) {
+        } catch (e) {
             console.error('Loading overlay error:', e);
         }
     }
@@ -2122,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const loader = document.getElementById('loadingOverlay');
             if (loader) loader.remove();
-        } catch(e) {
+        } catch (e) {
             console.error('Hide loading error:', e);
         }
     }
@@ -2130,7 +2207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ━━━ 24. INITIAL RENDER ━━━
     try {
         render();
-    } catch(e) {
+    } catch (e) {
         console.error('Initial render error:', e);
         showNotification('Editor error', 'error');
     }

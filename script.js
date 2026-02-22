@@ -23,14 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Add the 'visible' class to trigger the CSS animation
                 entry.target.classList.add('visible');
-                
-                // Optional: Stop observing once it's visible if you only want it to animate once
-                // observer.unobserve(entry.target); 
-            } else {
-                // Remove this line if you want elements to stay visible after scrolling past them
-                entry.target.classList.remove('visible'); 
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
