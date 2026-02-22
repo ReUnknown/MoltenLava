@@ -57,9 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const highlightPalette = document.getElementById('highlightPalette');
     const highlightIndicator = document.getElementById('highlightIndicator');
     const highlightColorWheel = document.getElementById('highlightColorWheel');
-    const fontPickerBtn = document.getElementById('fontPickerBtn');
-    const fontPickerLabel = document.getElementById('fontPickerLabel');
-    const fontPickerDropdown = document.getElementById('fontPickerDropdown');
+    const fontPickerBtn = null;
+    const fontPickerLabel = null;
+    const fontPickerDropdown = null;
+    const fontFamily = document.getElementById('fontFamily');
     const btnImage = document.getElementById('btnImage');
     const imageInput = document.getElementById('imageInput');
     const btnHelp = document.getElementById('btnHelp');
@@ -164,87 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnRedo) btnRedo.onclick = () => exec('redo');
     if (fmtHeading) fmtHeading.onchange = () => exec('formatBlock', fmtHeading.value);
 
-    // --- FONT SIZE (FIXED v4) ---
-    function applyFontSize(size) {
-        size = Math.max(8, Math.min(96, parseInt(size) || 14));
-        fmtSize.value = size;
-        if (!restoreSelection()) { docContent.focus(); return; }
-
-        const sel = window.getSelection();
-        if (!sel.rangeCount || sel.isCollapsed) return;
-
-        document.execCommand('fontSize', false, '7');
-        docContent.querySelectorAll('font[size="7"]').forEach(f => {
-            const span = document.createElement('span');
-            span.style.fontSize = size + 'px';
-            span.innerHTML = f.innerHTML;
-            f.replaceWith(span);
-        });
-        docContent.querySelectorAll('span').forEach(s => {
-            const fs = s.style.fontSize;
-            if (fs === 'xxx-large' || fs === '-webkit-xxx-large') {
-                s.style.fontSize = size + 'px';
-            }
-        });
-
-        debouncedSave();
-        updateFormatState();
-    }
-
-    if (fmtSize) {
-        let pendingSize = null;
-        fmtSize.oninput = () => { pendingSize = parseInt(fmtSize.value); };
-        fmtSize.onkeydown = (e) => {
-            e.stopPropagation();
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                applyFontSize(fmtSize.value);
-                docContent.focus();
-            }
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                const next = Math.min(96, (parseInt(fmtSize.value) || 14) + 2);
-                fmtSize.value = next;
-                applyFontSize(next);
-            }
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                const next = Math.max(8, (parseInt(fmtSize.value) || 14) - 2);
-                fmtSize.value = next;
-                applyFontSize(next);
-            }
-        };
-        fmtSize.onblur = () => {
-            if (pendingSize !== null && !isNaN(pendingSize) && pendingSize >= 8 && pendingSize <= 96) {
-                applyFontSize(pendingSize);
-                pendingSize = null;
-            }
+    if (fontFamily) {
+        fontFamily.onchange = (e) => {
+            if (restoreSelection()) exec('fontName', e.target.value);
         };
     }
-    if (sizeMinus) sizeMinus.onclick = (e) => { e.preventDefault(); applyFontSize(parseInt(fmtSize.value) - 2); };
-    if (sizePlus) sizePlus.onclick = (e) => { e.preventDefault(); applyFontSize(parseInt(fmtSize.value) + 2); };
-
-    // --- CUSTOM FONT PICKER ---
-    function buildFontDropdown() {
-        if (!fontPickerDropdown) return;
-        fontPickerDropdown.innerHTML = '';
-        FONTS.forEach(font => {
-            const item = document.createElement('div');
-            item.className = 'font-picker-item';
-            item.style.fontFamily = font.value;
-            item.textContent = font.name;
-            item.onclick = (e) => {
-                e.stopPropagation();
-                if (restoreSelection()) exec('fontName', font.value);
-                fontPickerLabel.textContent = font.name;
-                fontPickerLabel.style.fontFamily = font.value;
-                fontPickerDropdown.classList.add('hidden');
-            };
-            fontPickerDropdown.appendChild(item);
-        });
-    }
-    buildFontDropdown();
-    if (fontPickerBtn) fontPickerBtn.onclick = (e) => { e.stopPropagation(); closeAllDropdowns(); fontPickerDropdown.classList.toggle('hidden'); };
 
     // --- TEXT COLOR ---
     if (fmtColor) fmtColor.oninput = () => { if (restoreSelection()) exec('foreColor', fmtColor.value); };
@@ -274,23 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
             highlightIndicator.style.background = e.target.value;
             if (restoreSelection()) exec('hiliteColor', e.target.value);
         };
-    }
-    if (highlightArrow) highlightArrow.onclick = (e) => { e.stopPropagation(); closeAllDropdowns(); highlightPalette.classList.toggle('hidden'); };
-    if (highlightPalette) {
-        highlightPalette.querySelectorAll('.palette-color').forEach(swatch => {
-            swatch.onclick = (e) => {
-                e.stopPropagation();
-                const color = swatch.dataset.color;
-                if (color) {
-                    currentHighlightColor = color;
-                    highlightIndicator.style.background = color;
-                    if (restoreSelection()) exec('hiliteColor', color);
-                } else {
-                    if (restoreSelection()) exec('removeFormat');
-                }
-                highlightPalette.classList.add('hidden');
-            };
-        });
     }
 
     // --- FILE MENU ---
@@ -362,96 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         jsonInput.value = '';
     };
 
-    // Export PNG — actual download using canvas
-    if (btnExportPNG) btnExportPNG.onclick = async () => {
-        save();
-        fileMenu.classList.add('hidden');
-        showNotification('Generating PNG...');
 
-        try {
-            // Create off-screen container
-            const container = document.createElement('div');
-            container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;padding:72px;font-family:Inter,sans-serif;font-size:14px;line-height:1.7;color:#000;';
-            container.innerHTML = docContent.innerHTML;
-            // Remove any contenteditable artifacts
-            container.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
-            document.body.appendChild(container);
-
-            const height = Math.max(container.scrollHeight, 1056);
-
-            // Use SVG foreignObject → Canvas → PNG
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const svg = document.createElementNS(svgNS, 'svg');
-            svg.setAttribute('width', '816');
-            svg.setAttribute('height', String(height));
-
-            const fo = document.createElementNS(svgNS, 'foreignObject');
-            fo.setAttribute('width', '100%');
-            fo.setAttribute('height', '100%');
-
-            const body = document.createElement('div');
-            body.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-            body.style.cssText = 'width:816px;padding:72px;font-family:Inter,sans-serif;font-size:14px;line-height:1.7;color:#000;background:#fff;box-sizing:border-box;';
-            body.innerHTML = container.innerHTML;
-
-            // Remove images (they cause CORS issues in SVG foreignObject)
-            body.querySelectorAll('img').forEach(img => {
-                const placeholder = document.createElement('div');
-                placeholder.style.cssText = `width:${img.width || 200}px;height:${img.height || 150}px;background:#f0f0f0;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;border-radius:4px;`;
-                placeholder.textContent = '[Image]';
-                img.replaceWith(placeholder);
-            });
-
-            fo.appendChild(body);
-            svg.appendChild(fo);
-
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const dpr = 2;
-                canvas.width = 816 * dpr;
-                canvas.height = height * dpr;
-                const ctx = canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, 816, height);
-                ctx.drawImage(img, 0, 0, 816, height);
-
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob);
-                        a.download = `${currentDoc.title.replace(/[^a-z0-9]/gi, '_')}.png`;
-                        a.click();
-                        URL.revokeObjectURL(a.href);
-                        showNotification('PNG downloaded!');
-                    } else {
-                        showNotification('PNG export failed.');
-                    }
-                }, 'image/png');
-
-                URL.revokeObjectURL(url);
-                document.body.removeChild(container);
-            };
-            img.onerror = () => {
-                // Fallback: open print-friendly window
-                URL.revokeObjectURL(url);
-                document.body.removeChild(container);
-                const printWin = window.open('', '_blank');
-                printWin.document.write(`<!DOCTYPE html><html><head><title>${currentDoc.title}</title><style>body{font-family:Inter,sans-serif;padding:72px;max-width:816px;margin:0 auto;color:#000;font-size:14px;line-height:1.7;background:#fff;}img{max-width:100%;height:auto;}</style></head><body>${docContent.innerHTML}</body></html>`);
-                printWin.document.close();
-                showNotification('Opened export window — use Save as Image from browser');
-            };
-            img.src = url;
-        } catch (err) {
-            console.error('Export error:', err);
-            showNotification('Export failed');
-        }
-    };
 
     // Print
     if (btnPrint) btnPrint.onclick = () => {
@@ -591,24 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fontName = document.queryCommandValue('fontName');
-        if (fontName && fontPickerLabel) {
+        if (fontName && fontFamily) {
             const clean = fontName.replace(/"/g, '');
             const match = FONTS.find(f => f.value.includes(clean) || f.name.toLowerCase() === clean.toLowerCase());
-            if (match) { fontPickerLabel.textContent = match.name; fontPickerLabel.style.fontFamily = match.value; }
-        }
-
-        // Show selected text's font size
-        if (fmtSize && document.activeElement !== fmtSize) {
-            const sel = window.getSelection();
-            if (sel.rangeCount > 0 && sel.anchorNode) {
-                let node = sel.anchorNode;
-                if (node.nodeType === 3) node = node.parentElement;
-                if (node) {
-                    const computed = window.getComputedStyle(node).fontSize;
-                    const px = parseInt(computed);
-                    if (px && px !== parseInt(fmtSize.value)) fmtSize.value = px;
-                }
-            }
+            if (match) { fontFamily.value = match.value; }
         }
 
         if (fmtColor) {

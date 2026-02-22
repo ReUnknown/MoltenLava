@@ -37,13 +37,7 @@
                             </svg>
                             Export JSON
                         </div>
-                        <div class="dropdown-option" id="btnExportPNG">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                            </svg>
-                            Export PNG
-                        </div>
+
                         <div class="dd-divider"></div>
                         <div class="dropdown-option" id="btnPrint">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -83,20 +77,33 @@
                 <option value="H3">Heading 3</option>
             </select>
             <div class="toolbar-divider"></div>
-            <div class="font-picker-wrap">
-                <button class="font-picker-btn" id="fontPickerBtn" title="Font family">
-                    <span id="fontPickerLabel">Inter</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7 10l5 5 5-5z" />
-                    </svg>
-                </button>
-                <div class="font-picker-dropdown hidden" id="fontPickerDropdown"></div>
-            </div>
-            <div class="size-control">
-                <button class="size-btn" id="sizeMinus" title="Decrease">−</button>
-                <input type="number" id="fmtSize" class="fmt-size-input" value="14" min="8" max="96" title="Font size">
-                <button class="size-btn" id="sizePlus" title="Increase">+</button>
-            </div>
+            <select id="fontFamily" class="fmt-select" title="Font family">
+                <option value="Inter, sans-serif">Inter</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Helvetica, sans-serif">Helvetica</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="Impact, sans-serif">Impact</option>
+                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                <option value="'Arial Black', sans-serif">Arial Black</option>
+                <option value="Palatino, serif">Palatino</option>
+                <option value="Garamond, serif">Garamond</option>
+                <option value="Bookman, serif">Bookman</option>
+                <option value="'Lucida Console', monospace">Lucida Console</option>
+                <option value="Monaco, monospace">Monaco</option>
+                <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                <option value="Tahoma, sans-serif">Tahoma</option>
+                <option value="Rockwell, serif">Rockwell</option>
+                <option value="'Franklin Gothic Medium', sans-serif">Franklin Gothic</option>
+                <option value="'Brush Script MT', cursive">Brush Script</option>
+                <option value="Copperplate, serif">Copperplate</option>
+                <option value="Papyrus, fantasy">Papyrus</option>
+                <option value="'Lucida Sans', sans-serif">Lucida Sans</option>
+                <option value="Didot, serif">Didot</option>
+            </select>
             <div class="toolbar-divider"></div>
             <button class="fmt-btn" id="btnBold" title="Bold (Ctrl+B)"><strong>B</strong></button>
             <button class="fmt-btn" id="btnItalic" title="Italic (Ctrl+I)"><em>I</em></button>
@@ -105,29 +112,13 @@
             <div class="toolbar-divider"></div>
             <div class="color-swatch" title="Text color"><input type="color" id="fmtColor" value="#000000"></div>
             <div class="highlight-wrap">
-                <button class="fmt-btn highlight-btn" id="highlightBtn"
+                <button class="fmt-btn highlight-btn" id="highlightBtn" style="border-radius: 5px !important;"
                     title="Highlight (double-click for color wheel)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M11 2L5.5 16h2.25l1.12-3h6.25l1.12 3h2.25L13 2h-2zm-1.38 9L12 4.67 14.38 11H9.62z" />
                     </svg>
                     <div class="highlight-indicator" id="highlightIndicator" style="background:#ffff00;"></div>
                 </button>
-                <button class="fmt-btn highlight-arrow" id="highlightArrow" title="Pick highlight color">
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7 10l5 5 5-5z" />
-                    </svg>
-                </button>
-                <div class="highlight-palette hidden" id="highlightPalette">
-                    <div class="palette-color" data-color="#ffff00" style="background:#ffff00;" title="Yellow"></div>
-                    <div class="palette-color" data-color="#00ff00" style="background:#00ff00;" title="Green"></div>
-                    <div class="palette-color" data-color="#00ffff" style="background:#00ffff;" title="Cyan"></div>
-                    <div class="palette-color" data-color="#ff9900" style="background:#ff9900;" title="Orange"></div>
-                    <div class="palette-color" data-color="#ff69b4" style="background:#ff69b4;" title="Pink"></div>
-                    <div class="palette-color" data-color="#da70d6" style="background:#da70d6;" title="Purple"></div>
-                    <div class="palette-color" data-color="#87ceeb" style="background:#87ceeb;" title="Light Blue">
-                    </div>
-                    <div class="palette-color no-highlight" data-color="" title="Remove">✕</div>
-                </div>
                 <input type="color" id="highlightColorWheel" value="#ffff00" style="display:none;">
             </div>
             <div class="toolbar-divider"></div>
