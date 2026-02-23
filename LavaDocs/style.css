@@ -199,6 +199,16 @@ body {
     word-break: break-word;
 }
 
+.doc-preview-content img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+.doc-preview-content .img-resize-handle {
+    display: none !important;
+}
+
 .doc-card-info {
     padding: 12px;
 }
@@ -601,139 +611,7 @@ kbd {
     border-color: var(--accent-orange);
 }
 
-/* Font Size */
-.size-control {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-}
 
-.size-btn {
-    width: 22px;
-    height: 30px;
-    background: var(--bg-input);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    font-size: 0.85rem;
-    transition: 0.15s;
-}
-
-.size-btn:first-child {
-    border-radius: 5px 0 0 5px;
-    border-right: none;
-}
-
-.size-btn:last-child {
-    border-radius: 0 5px 5px 0;
-    border-left: none;
-}
-
-.size-btn:hover {
-    background: var(--bg-elevated);
-    color: white;
-}
-
-.fmt-size-input {
-    background: var(--bg-input);
-    border: 1px solid var(--border-light);
-    border-left: none;
-    border-right: none;
-    color: white;
-    width: 36px;
-    padding: 4px;
-    border-radius: 0;
-    text-align: center;
-    font-size: 0.75rem;
-    height: 30px;
-    -moz-appearance: textfield;
-    appearance: textfield;
-    font-family: var(--font-main);
-}
-
-.fmt-size-input::-webkit-outer-spin-button,
-.fmt-size-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-}
-
-/* Custom Font Picker */
-.font-picker-wrap {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.font-picker-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-input);
-    border: 1px solid var(--border-light);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    height: 30px;
-    font-size: 0.75rem;
-    min-width: 100px;
-    transition: 0.15s;
-    font-family: var(--font-main);
-}
-
-.font-picker-btn:hover {
-    border-color: var(--text-faint);
-}
-
-.font-picker-btn span:first-child {
-    flex: 1;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.font-picker-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 200px;
-    max-height: 300px;
-    overflow-y: auto;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
-    z-index: 200;
-    margin-top: 4px;
-    padding: 4px;
-}
-
-.font-picker-dropdown::-webkit-scrollbar {
-    width: 5px;
-}
-
-.font-picker-dropdown::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 3px;
-}
-
-.font-picker-item {
-    padding: 7px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    transition: 0.12s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.font-picker-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: white;
-}
 
 /* Highlight */
 .highlight-wrap {
@@ -759,50 +637,7 @@ kbd {
     border-radius: 2px;
 }
 
-.highlight-arrow {
-    width: 16px !important;
-    border-radius: 0 5px 5px 0 !important;
-    border-left: 1px solid var(--border-subtle) !important;
-}
 
-.highlight-palette {
-    position: absolute;
-    top: 100%;
-    left: -16px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
-    padding: 8px;
-    z-index: 200;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
-    margin-top: 4px;
-}
-
-.palette-color {
-    width: 26px;
-    height: 26px;
-    border-radius: 5px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: 0.15s;
-}
-
-.palette-color:hover {
-    border-color: white;
-    transform: scale(1.1);
-}
-
-.no-highlight {
-    background: var(--bg-input) !important;
-    border: 1px solid var(--border-light) !important;
-    color: var(--text-faint);
-    display: grid;
-    place-items: center;
-    font-size: 0.65rem;
-}
 
 /* Text Color */
 .color-swatch {
