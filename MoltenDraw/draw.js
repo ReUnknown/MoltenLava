@@ -296,7 +296,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
+<<<<<<< HEAD
         ctx.lineTo(drawX, drawY);
+=======
+
+        // Quadratic curve for smoother lines
+        const mx = (lastX + drawX) / 2;
+        const my = (lastY + drawY) / 2;
+        ctx.quadraticCurveTo(lastX, lastY, mx, my);
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
         ctx.stroke();
 
         lastX = drawX;
@@ -712,9 +720,15 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('JSON exported!');
     };
 
+<<<<<<< HEAD
     btnImportJSON.onclick = async () => {
         fileMenu.classList.add('hidden');
         if (!await AppModal.confirm('Import will replace your current canvas. Continue?', 'Import Notice')) return;
+=======
+    btnImportJSON.onclick = () => {
+        fileMenu.classList.add('hidden');
+        if (!confirm('Import will replace your current canvas. Continue?')) return;
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
         jsonInput.click();
     };
 
@@ -753,9 +767,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 'image/png');
     };
 
+<<<<<<< HEAD
     btnNewCanvas.onclick = async () => {
         fileMenu.classList.add('hidden');
         if (!await AppModal.confirm('Clear canvas and start fresh?', 'New Canvas')) return;
+=======
+    btnNewCanvas.onclick = () => {
+        fileMenu.classList.add('hidden');
+        if (!confirm('Clear canvas and start fresh?')) return;
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
         pushUndo();
         layers = []; activeLayerIdx = 0; addLayer('Background', true);
         renderLayers(); renderLayerList();

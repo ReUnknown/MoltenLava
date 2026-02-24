@@ -206,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (restoreSelection()) exec('hiliteColor', e.target.value);
         };
     }
+<<<<<<< HEAD
 
     // --- LINK ---
     if (btnLink) {
@@ -228,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+=======
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
 
     // --- FILE MENU ---
     if (fileMenuBtn) fileMenuBtn.onclick = (e) => { e.stopPropagation(); closeAllDropdowns(); fileMenu.classList.toggle('hidden'); };
