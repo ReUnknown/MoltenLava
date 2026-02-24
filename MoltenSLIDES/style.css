@@ -1290,11 +1290,11 @@ body.presenting .slide-canvas {
 
 .slide-controls {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1309,8 +1309,8 @@ body.presenting .slide-canvas {
 }
 
 .slide-control-btn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(9, 9, 11, 0.85);

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="MoltenNotes — Sticky notes, pages, and triangles with widgets, links, and categories.">
+    <title>MoltenNotes</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700;800&family=Caveat:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="notes-hub">
+        <header class="hub-header">
+            <div class="hub-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#f59e0b" />
+                </svg>
+                <div class="hub-title">Molten<span>Notes</span></div>
+            </div>
+            <div class="hub-actions">
+                <a href="../index.html" class="btn-sec">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                    </svg>
+                    Suite
+                </a>
+                <div style="position:relative;">
+                    <button class="btn-sec" id="hubFileBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        </svg>
+                        File
+                    </button>
+                    <div class="file-dropdown hidden" id="hubFileDropdown">
+                        <div class="fd-item" id="hubExportAll">Export All Notes</div>
+                        <div class="fd-item" id="hubImportNotes">Import Notes</div>
+                        <div class="fd-sep"></div>
+                        <div class="fd-item" id="hubExportCats">Export Categories</div>
+                        <div class="fd-item" id="hubImportCats">Import Categories</div>
+                    </div>
+                </div>
+                <select id="categoryFilter" class="cat-select">
+                    <option value="all">All</option>
+                </select>
+                <button class="btn-primary" id="newNoteBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    New Note
+                </button>
+            </div>
+        </header>
+
+        <!-- Category chips -->
+        <div class="category-bar" id="categoryBar"></div>
+
+        <!-- New Note Picker -->
+        <div class="new-note-picker hidden" id="notePicker">
+            <div class="picker-overlay" onclick="closePicker()"></div>
+            <div class="picker-modal">
+                <h3>Choose Note Type</h3>
+                <div class="picker-grid">
+                    <div class="picker-option" onclick="createNote('sticky')">
+                        <div class="picker-preview sticky-preview"></div>
+                        <span>Sticky Note</span>
+                        <small>Quick and colorful</small>
+                    </div>
+                    <div class="picker-option" onclick="createNote('paper')">
+                        <div class="picker-preview paper-preview"></div>
+                        <span>Paper</span>
+                        <small>Full page, structured</small>
+                    </div>
+                    <div class="picker-option" onclick="createNote('triangle')">
+                        <div class="picker-preview triangle-preview"></div>
+                        <span>Triangle</span>
+                        <small>Unique and creative</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Grid -->
+        <div class="notes-grid" id="notesGrid"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="emptyState">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="var(--faint)">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+            </svg>
+            <h3>No notes yet</h3>
+            <p>Click "New Note" to start writing!</p>
+        </div>
+    </div>
+
+    <!-- Context menu for notes -->
+    <div class="widget-context-menu hidden" id="noteCtx">
+        <div class="ctx-item" id="ctxOpen">Open</div>
+        <div class="ctx-item" id="ctxRenameNote">Rename</div>
+        <div class="ctx-item" id="ctxIconNote">Change Icon</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item ctx-danger" id="ctxDeleteNote">Delete</div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" style="display:none;">
+
+    <script src="../shared_modal.js"></script>
+    <script>
+        const STORAGE_KEY = 'moltenNotes_v1';
+        const STICKY_COLORS = ['#fef08a', '#fca5a5', '#86efac', '#93c5fd', '#c4b5fd', '#fdba74'];
+        const NOTE_ICONS = ['pin', 'star', 'fire', 'bulb', 'target', 'note', 'folder', 'check'];
+        const ICON_SVGS = {
+            pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>',
+            star: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>',
+            fire: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C12 2 4 8 4 14c0 4.4 3.6 8 8 8s8-3.6 8-8C20 8 12 2 12 2z"/></svg>',
+            bulb: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>',
+            target: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>',
+            note: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>',
+            folder: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+            check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
+        };
+
+        let ctxNoteId = null;
+
+        function getStore() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { notes: [], categories: [] }; } catch { return { notes: [], categories: [] }; } }
+        function saveStore(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+        function render() {
+            const store = getStore();
+            const filter = document.getElementById('categoryFilter').value;
+            const notes = filter === 'all' ? store.notes : store.notes.filter(n => n.category === filter);
+
+            // Category select
+            const catSelect = document.getElementById('categoryFilter');
+            const curVal = catSelect.value;
+            catSelect.innerHTML = '<option value="all">All</option>';
+            store.categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = c.name;
+                catSelect.appendChild(opt);
+            });
+            catSelect.value = curVal;
+
+            // Category bar
+            const catBar = document.getElementById('categoryBar');
+            catBar.innerHTML = '';
+            const allChip = document.createElement('button');
+            allChip.className = 'cat-chip' + (filter === 'all' ? ' active' : '');
+            allChip.textContent = 'All';
+            allChip.onclick = () => { document.getElementById('categoryFilter').value = 'all'; render(); };
+            catBar.appendChild(allChip);
+
+            store.categories.forEach(c => {
+                const chip = document.createElement('button');
+                chip.className = 'cat-chip' + (filter === c.id ? ' active' : '');
+                chip.innerHTML = `${ICON_SVGS[c.icon] || ICON_SVGS.folder} ${c.name}`;
+                chip.onclick = () => { document.getElementById('categoryFilter').value = c.id; render(); };
+                catBar.appendChild(chip);
+            });
+
+            const addCat = document.createElement('button');
+            addCat.className = 'cat-chip cat-add';
+            addCat.textContent = '+ Category';
+            addCat.onclick = addCategory;
+            catBar.appendChild(addCat);
+
+            // Grid
+            const grid = document.getElementById('notesGrid');
+            const empty = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            if (notes.length === 0) {
+                empty.classList.remove('hidden');
+                grid.style.display = 'none';
+            } else {
+                empty.classList.add('hidden');
+                grid.style.display = '';
+                notes.sort((a, b) => b.modified - a.modified).forEach(note => {
+                    const card = document.createElement('div');
+                    card.className = `note-card note-${note.type}`;
+                    if (note.type === 'sticky') card.style.background = note.color || '#fef08a';
+                    if (note.type === 'triangle') card.style.setProperty('--tri-color', note.color || '#93c5fd');
+
+                    const catName = store.categories.find(c => c.id === note.category);
+                    const preview = (note.content || '').replace(/<[^>]+>/g, '').slice(0, 150);
+                    const iconSvg = ICON_SVGS[note.icon] || ICON_SVGS.pin;
+                    // Check if note has widgets for preview
+                    const hasWidgets = (note.content || '').includes('widget-embed');
+
+                    card.innerHTML = `
+                        <div class="note-card-header">
+                            <span class="note-icon">${iconSvg}</span>
+                        </div>
+                        <div class="note-title">${note.title || 'Untitled'}</div>
+                        <div class="note-preview">${preview || 'Empty note...'}</div>
+                        ${hasWidgets ? '<div class="note-widget-badge">Has widgets</div>' : ''}
+                        <div class="note-meta">
+                            ${catName ? `<span class="note-cat">${catName.name}</span>` : ''}
+                            <span>${new Date(note.modified).toLocaleDateString()}</span>
+                        </div>
+                    `;
+                    card.onclick = () => { window.location.href = `editor.html?id=${note.id}`; };
+                    card.oncontextmenu = (e) => { showNoteCtx(e, note.id); };
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        function showNoteCtx(e, noteId) {
+            e.preventDefault();
+            e.stopPropagation();
+            ctxNoteId = noteId;
+            const ctx = document.getElementById('noteCtx');
+            ctx.style.left = e.clientX + 'px';
+            ctx.style.top = e.clientY + 'px';
+            ctx.classList.remove('hidden');
+        }
+
+        document.addEventListener('click', () => {
+            document.getElementById('noteCtx').classList.add('hidden');
+            document.getElementById('hubFileDropdown').classList.add('hidden');
+        });
+
+        document.getElementById('ctxOpen').onclick = () => { if (ctxNoteId) window.location.href = `editor.html?id=${ctxNoteId}`; };
+        document.getElementById('ctxRenameNote').onclick = async () => {
+            if (!ctxNoteId) return;
+            const store = getStore();
+            const n = store.notes.find(x => x.id === ctxNoteId);
+            if (!n) return;
+            const name = await AppModal.prompt('Rename note:', n.title || 'Untitled');
+            if (name !== null) { n.title = name; n.modified = Date.now(); saveStore(store); render(); }
+        };
+        document.getElementById('ctxIconNote').onclick = async () => {
+            if (!ctxNoteId) return;
+            const store = getStore();
+            const n = store.notes.find(x => x.id === ctxNoteId);
+            if (!n) return;
+            const icons = NOTE_ICONS.join(', ');
+            const icon = await AppModal.prompt(`Choose icon (${icons}):`, n.icon || 'pin');
+            if (icon && NOTE_ICONS.includes(icon)) { n.icon = icon; n.modified = Date.now(); saveStore(store); render(); }
+        };
+        document.getElementById('ctxDeleteNote').onclick = async () => {
+            if (!ctxNoteId) return;
+            if (!await AppModal.confirm('Delete this note?')) return;
+            const store = getStore();
+            store.notes = store.notes.filter(n => n.id !== ctxNoteId);
+            saveStore(store); render();
+        };
+
+        async function addCategory() {
+            const name = await AppModal.prompt('Category name:');
+            if (!name) return;
+            const icons = NOTE_ICONS.join(', ');
+            const icon = await AppModal.prompt(`Icon (${icons}):`, 'folder');
+            const store = getStore();
+            store.categories.push({ id: 'cat_' + Date.now(), name, icon: NOTE_ICONS.includes(icon) ? icon : 'folder' });
+            saveStore(store);
+            render();
+        }
+
+        window.createNote = (type) => {
+            closePicker();
+            const store = getStore();
+            const note = {
+                id: 'n_' + Date.now(),
+                title: '',
+                type,
+                category: document.getElementById('categoryFilter').value === 'all' ? '' : document.getElementById('categoryFilter').value,
+                icon: type === 'sticky' ? 'pin' : type === 'triangle' ? 'fire' : 'note',
+                color: type === 'sticky' ? STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)] : type === 'triangle' ? '#93c5fd' : '#ffffff',
+                content: '',
+                widgets: [],
+                created: Date.now(),
+                modified: Date.now()
+            };
+            store.notes.unshift(note);
+            saveStore(store);
+            window.location.href = `editor.html?id=${note.id}`;
+        };
+
+        // File menu
+        document.getElementById('hubFileBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('hubFileDropdown').classList.toggle('hidden'); };
+
+        document.getElementById('hubExportAll').onclick = () => {
+            const store = getStore();
+            const blob = new Blob([JSON.stringify({ type: 'moltennotes-all', version: 1, data: store }, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'MoltenNotes_AllNotes.json'; a.click();
+            URL.revokeObjectURL(a.href);
+        };
+
+        document.getElementById('hubImportNotes').onclick = () => {
+            window._importMode = 'notes';
+            document.getElementById('fileInput').click();
+        };
+
+        document.getElementById('hubExportCats').onclick = () => {
+            const store = getStore();
+            const blob = new Blob([JSON.stringify({ type: 'moltennotes-cats', version: 1, categories: store.categories }, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'MoltenNotes_Categories.json'; a.click();
+            URL.revokeObjectURL(a.href);
+        };
+
+        document.getElementById('hubImportCats').onclick = () => {
+            window._importMode = 'cats';
+            document.getElementById('fileInput').click();
+        };
+
+        document.getElementById('fileInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const json = JSON.parse(ev.target.result);
+                    const store = getStore();
+
+                    if (window._importMode === 'notes') {
+                        if (json.type === 'moltennotes-all' && json.data) {
+                            if (!await AppModal.confirm('Replace all notes and categories?')) return;
+                            saveStore(json.data);
+                        } else if (json.type === 'moltennotes-note' && json.note) {
+                            json.note.id = 'n_' + Date.now(); // New ID
+                            store.notes.unshift(json.note);
+                            saveStore(store);
+                        } else { alert('Invalid file'); return; }
+                    } else if (window._importMode === 'cats') {
+                        if (json.type !== 'moltennotes-cats' || !json.categories) { alert('Invalid file'); return; }
+                        if (!await AppModal.confirm('Replace all categories?')) return;
+                        store.categories = json.categories;
+                        saveStore(store);
+                    }
+                    render();
+                } catch { alert('Import failed'); }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        };
+
+        document.getElementById('newNoteBtn').onclick = () => document.getElementById('notePicker').classList.remove('hidden');
+        window.closePicker = () => document.getElementById('notePicker').classList.add('hidden');
+        document.getElementById('categoryFilter').onchange = render;
+
+        render();
+    </script>
+</body>
+
+</html>

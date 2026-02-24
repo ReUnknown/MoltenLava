@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoltenLava Future Apps Brainstorm</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: #121214;
+            --elevated: #1a1a1e;
+            --border: #27272a;
+            --text: #fafafa;
+            --muted: #a1a1aa;
+            --faint: #52525b;
+            --orange: #ff5e3a;
+            --cyan: #06b6d4;
+            --amber: #f59e0b;
+            --accent: #8b5cf6;
+            --accent2: #ec4899;
+            --font: 'Inter', system-ui, sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span {
+            background: -webkit-linear-gradient(45deg, var(--orange), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .go-back {
+            display: inline-block;
+            margin-top: 1rem;
+            text-decoration: none;
+            color: var(--orange);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .go-back:hover {
+            background: rgba(255, 94, 58, 0.1);
+            border-color: var(--orange);
+        }
+
+        main {
+            padding: 4rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--elevated);
+            display: grid;
+            place-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--card-color-1);
+        }
+
+        .title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .features {
+            list-style: none;
+        }
+
+        .features li {
+            font-size: 0.85rem;
+            color: var(--faint);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .features li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--card-color-1);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1><span>Molten</span>Lava Brainstorm</h1>
+        <p class="subtitle">Exploring potential new apps to expand the premium desktop web suite.</p>
+        <a href="index.html" class="go-back">&larr; Back to Suite</a>
+    </header>
+
+    <main>
+        <div
+            style="background: rgba(255, 94, 58, 0.1); border: 1px solid rgba(255, 94, 58, 0.3); border-radius: 12px; padding: 16px 24px; margin-bottom: 32px; color: #ff5e3a; text-align: center;">
+            <strong>Disclaimer:</strong> The applications listed below are concepts and potential ideas that
+            <em>could</em> come in the future. They are not currently in active development.
+        </div>
+
+        <div class="grid">
+            <!-- MoltenSheets -->
+            <div class="card" style="--card-color-1: #10b981; --card-color-2: #34d399;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M4 3h16c.55 0 1 .45 1 1v16c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1zm1 2v4h4V5H5zm6 0v4h4V5h-4zm6 0v4h4V5h-4zM5 11v4h4v-4H5zm6 0v4h4v-4h-4zm6 0v4h4v-4h-4zM5 17v4h4v-4H5zm6 0v4h4v-4h-4zm6 0v4h4v-4h-4z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenSheets</div>
+                <div class="desc">A lightweight but powerful spreadsheet web app. Focus on blazing fast data entry,
+                    basic formulas, and beautiful offline charting.</div>
+                <ul class="features">
+                    <li>Dynamic grid logic (A1 + B2)</li>
+                    <li>Instant SVG Charting embedded</li>
+                    <li>Filter, Sort, and highlighting</li>
+                    <li>CSV / Excel offline exporting</li>
+                </ul>
+            </div>
+
+            <!-- MoltenTasks -->
+            <div class="card" style="--card-color-1: #ec4899; --card-color-2: #f43f5e;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenTasks (or MoltenBoard)</div>
+                <div class="desc">A Kanban-style project management board like Trello, allowing dragging cards across
+                    columns natively.</div>
+                <ul class="features">
+                    <li>Drag & Drop columns and cards</li>
+                    <li>Checklists and due dates inside cards</li>
+                    <li>Kanban, List, and Calendar views</li>
+                    <li>Custom color tags and priority levels</li>
+                </ul>
+            </div>
+
+            <!-- MoltenMind -->
+            <div class="card" style="--card-color-1: #8b5cf6; --card-color-2: #a855f7;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenMind</div>
+                <div class="desc">A visual mind-mapping and brainstorming tool, using a node-based infinite canvas
+                    structure.</div>
+                <ul class="features">
+                    <li>Infinite panning/zooming HTML5 Canvas</li>
+                    <li>Connecting nodes with Bezier curves</li>
+                    <li>Rich text nodes (images, links, bold)</li>
+                    <li>Clean auto-layout algorithms</li>
+                </ul>
+            </div>
+
+            <!-- MoltenMail / MoltenContacts -->
+            <div class="card" style="--card-color-1: #3b82f6; --card-color-2: #60a5fa;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenMail (Template Builder)</div>
+                <div class="desc">A beautiful email template designer that outputs raw, perfectly responsive HTML you
+                    can paste into Gmail/Outlook.</div>
+                <ul class="features">
+                    <li>Drag and drop layout blocks</li>
+                    <li>100% inline-CSS generation for mail clients</li>
+                    <li>Variables and placeholders</li>
+                    <li>Preview on mobile, tablet, and desktop</li>
+                </ul>
+            </div>
+
+            <!-- MoltenCode -->
+            <div class="card" style="--card-color-1: #fbbf24; --card-color-2: #f59e0b;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenCode</div>
+                <div class="desc">A secure, local-only code snippet manager. Save, tag, and quickly copy code blocks
+                    with beautiful syntax highlighting.</div>
+                <ul class="features">
+                    <li>Syntax highlighting for 50+ languages</li>
+                    <li>1-click clipboard copy</li>
+                    <li>Multi-file snippets and variations</li>
+                    <li>Fully searchable by tag, lang, or content</li>
+                </ul>
+            </div>
+
+            <!-- MoltenFocus -->
+            <div class="card" style="--card-color-1: #64748b; --card-color-2: #94a3b8;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenFocus</div>
+                <div class="desc">A productivity timer, Pomodoro companion, ambient noise generator, and daily stat
+                    tracker.</div>
+                <ul class="features">
+                    <li>Beautiful, distraction-free timer rings</li>
+                    <li>White noise / cafe / rain ambient sounds</li>
+                    <li>Task-specific time logs</li>
+                    <li>Minimalist screensaver mode</li>
+                </ul>
+            </div>
+
+            <!-- MoltenDrive -->
+            <div class="card" style="--card-color-1: #0ea5e9; --card-color-2: #38bdf8;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenDrive</div>
+                <div class="desc">A decentralized, local-first file manager and cloud bridge. Organize files with tags
+                    instead of rigid folders.</div>
+                <ul class="features">
+                    <li>Tag-based file organization</li>
+                    <li>End-to-end encrypted local vaults</li>
+                    <li>S3 & WebDAV mounting support</li>
+                </ul>
+            </div>
+
+            <!-- MoltenForms -->
+            <div class="card" style="--card-color-1: #8b5cf6; --card-color-2: #c084fc;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenForms</div>
+                <div class="desc">Build beautiful, multi-step forms and surveys visually without a database. Collect
+                    responses straight to MoltenSheets.</div>
+                <ul class="features">
+                    <li>Conditional logic flows</li>
+                    <li>Beautiful, distraction-free UI</li>
+                    <li>Local JSON exports or webhook integration</li>
+                </ul>
+            </div>
+
+            <!-- MoltenCalendar -->
+            <div class="card" style="--card-color-1: #ef4444; --card-color-2: #f87171;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenCalendar</div>
+                <div class="desc">A clean, offline-first calendar that bridges your tasks, notes, and schedules into one
+                    unified timeline view.</div>
+                <ul class="features">
+                    <li>Year/Month/Week/Agenda views</li>
+                    <li>Time-blocking support</li>
+                    <li>ICS/WebCal syncing support</li>
+                </ul>
+            </div>
+
+            <!-- MoltenDesign / MoltenVector -->
+            <div class="card" style="--card-color-1: #14b8a6; --card-color-2: #2dd4bf;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenVector</div>
+                <div class="desc">A lightweight SVG-based vector editor. Perfect for UI mockups, icons, and precise
+                    shape design.</div>
+                <ul class="features">
+                    <li>Bezér pen tool & node editing</li>
+                    <li>Boolean path operations</li>
+                    <li>Clean SVG code export</li>
+                </ul>
+            </div>
+
+            <!-- MoltenAudio -->
+            <div class="card" style="--card-color-1: #eab308; --card-color-2: #fde047;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenAudio</div>
+                <div class="desc">An offline waveform audio editor. Trim recordings, adjust gain, and apply basic
+                    web-audio FX filters.</div>
+                <ul class="features">
+                    <li>Multi-track waveform visualization</li>
+                    <li>Cut, copy, paste, fade in/out</li>
+                    <li>Export to WAV/MP3</li>
+                </ul>
+            </div>
+
+            <!-- MoltenBase -->
+            <div class="card" style="--card-color-1: #6366f1; --card-color-2: #818cf8;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenBase</div>
+                <div class="desc">A local, relational Airtable-lite database. Build visual databases with linked
+                    records, formulas, and views.</div>
+                <ul class="features">
+                    <li>Grid, Gallery, and Kanban views</li>
+                    <li>Relational table linking</li>
+                    <li>Custom column types (tags, dates, attachments)</li>
+                </ul>
+            </div>
+
+            <!-- MoltenFinance -->
+            <div class="card" style="--card-color-1: #22c55e; --card-color-2: #4ade80;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenFinance</div>
+                <div class="desc">A privacy-first, manual budget tracker. Import CSV statements, categorize expenses,
+                    and track net worth targets.</div>
+                <ul class="features">
+                    <li>Auto-categorization rules</li>
+                    <li>Envelope budgeting mode</li>
+                    <li>Sankey diagrams & spending charts</li>
+                </ul>
+            </div>
+
+            <!-- MoltenType -->
+            <div class="card" style="--card-color-1: #d946ef; --card-color-2: #e879f9;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenType</div>
+                <div class="desc">A distraction-free, zen-mode text editor specifically built for long-form novel
+                    writing and screenplays.</div>
+                <ul class="features">
+                    <li>Typewriter scrolling & focus mode</li>
+                    <li>Word count & reading time goals</li>
+                    <li>Markdown to ePub/PDF export</li>
+                </ul>
+            </div>
+
+            <!-- MoltenGraph -->
+            <div class="card" style="--card-color-1: #06b6d4; --card-color-2: #22d3ee;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenGraph</div>
+                <div class="desc">Build interactive node-based data flow diagrams. Create math systems, logic circuits,
+                    or visual algorithms.</div>
+                <ul class="features">
+                    <li>Draggable nodes with inputs/outputs</li>
+                    <li>Real-time data flow evaluation</li>
+                    <li>Save setups to JSON</li>
+                </ul>
+            </div>
+
+            <!-- MoltenPixel -->
+            <div class="card" style="--card-color-1: #f97316; --card-color-2: #fb923c;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M5 5h4v4H5zm6-2h4v4h-4zm6 2h4v4h-4zm-6 6h4v4h-4zm6 2h4v4h-4zM5 13h4v4H5zm6 2h4v4h-4zm-6 2h4v4H5z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenPixel</div>
+                <div class="desc">A dedicated pixel art and sprite animation creator. Perfect for game developers who
+                    need a quick web tool.</div>
+                <ul class="features">
+                    <li>Frame-by-frame onion skinning</li>
+                    <li>Custom palettes & dithering tools</li>
+                    <li>Export to GIF or Sprite Sheets</li>
+                </ul>
+            </div>
+
+            <!-- MoltenBook -->
+            <div class="card" style="--card-color-1: #a855f7; --card-color-2: #c084fc;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 10l-2.5-1.5L12 12V4h5v8z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenBook</div>
+                <div class="desc">A minimalist ePub/PDF reader. Upload local ebooks and read them in a stylized,
+                    distraction-free environment.</div>
+                <ul class="features">
+                    <li>Saves reading progress locally</li>
+                    <li>Custom themes, fonts, margins</li>
+                    <li>Highlighting and bookmarking support</li>
+                </ul>
+            </div>
+
+            <!-- MoltenVideo -->
+            <div class="card" style="--card-color-1: #ef4444; --card-color-2: #f87171;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenVideo</div>
+                <div class="desc">A lightweight, in-browser video clipper. Upload MP4s, trim segments, compress, and
+                    output to WebM/GIF.</div>
+                <ul class="features">
+                    <li>Fast ffmpeg.wasm integration</li>
+                    <li>Timeline trimming with frame accuracy</li>
+                    <li>Add simple text overlays</li>
+                </ul>
+            </div>
+
+            <!-- MoltenVault -->
+            <div class="card" style="--card-color-1: #52525b; --card-color-2: #71717a;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenVault</div>
+                <div class="desc">An AES-256 encrypted local password and secure notes manager. Never sends data to the
+                    cloud.</div>
+                <ul class="features">
+                    <li>Client-side end-to-end encryption</li>
+                    <li>Master password lock</li>
+                    <li>Secure random password generator</li>
+                </ul>
+            </div>
+
+            <!-- MoltenTimer -->
+            <div class="card" style="--card-color-1: #10b981; --card-color-2: #34d399;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenTimer</div>
+                <div class="desc">A collection of massive, beautiful full-screen countdowns, stopwatches, and interval
+                    interval timers for gyms.</div>
+                <ul class="features">
+                    <li>Huge typography for across-the-room visibility</li>
+                    <li>Customizable alarms and color schemes</li>
+                    <li>Tabata / HIIT interval modes</li>
+                </ul>
+            </div>
+
+            <!-- MoltenMap -->
+            <div class="card" style="--card-color-1: #3b82f6; --card-color-2: #60a5fa;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenMap</div>
+                <div class="desc">A geographic trip planner. Drop pins, draw routes, and calculate distances entirely on
+                    an offline-capable canvas.</div>
+                <ul class="features">
+                    <li>Vector maps integration</li>
+                    <li>Route distance calculator</li>
+                    <li>Custom pin colors and travel notes</li>
+                </ul>
+            </div>
+
+            <!-- MoltenFlash -->
+            <div class="card" style="--card-color-1: #f43f5e; --card-color-2: #fb7185;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 20V4c4.42 0 8 3.58 8 8s-3.58 8-8 8zm0-18C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenFlash</div>
+                <div class="desc">A spaced-repetition flashcard system like Anki. Import CSVs, test your memory, and
+                    track your retention curves.</div>
+                <ul class="features">
+                    <li>Algorithm-based spaced repetition</li>
+                    <li>Deck statistics and heatmaps</li>
+                    <li>Rich text and image card support</li>
+                </ul>
+            </div>
+
+            <!-- MoltenTerminal -->
+            <div class="card" style="--card-color-1: #10b981; --card-color-2: #34d399;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.11-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13 6.09 10.41 7.5 9l4 4-4 4z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenTerminal</div>
+                <div class="desc">A browser-based faux-terminal environment for developers. Run javascript snippets,
+                    calculate math, or play text-adventures.</div>
+                <ul class="features">
+                    <li>Customizable prompt and themes</li>
+                    <li>Built-in calculators and JS execution</li>
+                    <li>Hidden easter egg games</li>
+                </ul>
+            </div>
+
+            <!-- MoltenBoard -->
+            <div class="card" style="--card-color-1: #6366f1; --card-color-2: #818cf8;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7V7h2v10zm4 0h-2V7h2v10zm4 0h-2V7h2v10z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenBoard</div>
+                <div class="desc">A freeform digital corkboard. Pin images, stickies, arrows, and web links onto an
+                    endless 2D canvas.</div>
+                <ul class="features">
+                    <li>Pinterest-style mood board layout</li>
+                    <li>Infinite zoom and pan capabilities</li>
+                    <li>Export board as high-res PNG</li>
+                </ul>
+            </div>
+
+            <!-- MoltenResume -->
+            <div class="card" style="--card-color-1: #8b5cf6; --card-color-2: #a855f7;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenResume</div>
+                <div class="desc">A local ATS-friendly resume builder. Fill out forms and let the app typeset beautiful
+                    PDF resumes instantly.</div>
+                <ul class="features">
+                    <li>Multiple typography templates</li>
+                    <li>One-click PDF generation via jsPDF</li>
+                    <li>Live A4 page preview</li>
+                </ul>
+            </div>
+
+            <!-- MoltenJournal -->
+            <div class="card" style="--card-color-1: #06b6d4; --card-color-2: #22d3ee;">
+                <div class="icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 3v18h18V3H3zm14 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                    </svg>
+                </div>
+                <div class="title">MoltenJournal</div>
+                <div class="desc">A daily diary application. Prompts you with questions, tracks moods, and encrypts
+                    entries on your machine.</div>
+                <ul class="features">
+                    <li>Calendar heat-map for tracking consistency</li>
+                    <li>Password protection</li>
+                    <li>Daily inspiration prompts</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
