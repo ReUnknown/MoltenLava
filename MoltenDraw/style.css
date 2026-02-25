@@ -5,7 +5,11 @@
 
 :root {
     --bg-base: #09090b;
+<<<<<<< HEAD
     --bg-surface: #0a0a0c;
+=======
+    --bg-surface: #121214;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     --bg-elevated: #1a1a1e;
     --bg-input: #18181b;
     --border-light: #27272a;
@@ -13,8 +17,13 @@
     --text-main: #fafafa;
     --text-muted: #a1a1aa;
     --text-faint: #52525b;
+<<<<<<< HEAD
     --accent-cyan: #06b6d4;
     --accent-dim: rgba(6, 182, 212, 0.12);
+=======
+    --accent-orange: #ff5e3a;
+    --accent-dim: rgba(255, 94, 58, 0.12);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     --accent-cyan: #06b6d4;
     --accent-cyan-dim: rgba(6, 182, 212, 0.12);
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
@@ -49,6 +58,7 @@ body {
     display: none !important;
 }
 
+<<<<<<< HEAD
 /* ========== V4 AMBIENT GLOW ========== */
 .ambient-glow { display: none;
     position: fixed;
@@ -79,6 +89,8 @@ body {
     }
 }
 
+=======
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 .mobile-only {
     display: none !important;
 }
@@ -89,15 +101,22 @@ body {
     flex-direction: column;
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     position: relative;
     z-index: 1;
+=======
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 }
 
 .top-bar {
     height: var(--top-bar-h);
+<<<<<<< HEAD
     background: rgba(10, 10, 12, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--bg-surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-bottom: 1px solid var(--border-light);
     display: flex;
     align-items: center;
@@ -141,7 +160,11 @@ body {
 }
 
 .back-btn {
+<<<<<<< HEAD
     color: var(--accent-cyan);
+=======
+    color: var(--accent-orange);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 }
 
 .back-btn:hover {
@@ -228,9 +251,13 @@ body {
 /* ═══ TOOL STRIP ═══ */
 .tool-strip {
     width: var(--tool-strip-w);
+<<<<<<< HEAD
     background: rgba(10, 10, 12, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--bg-surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-right: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
@@ -277,7 +304,11 @@ body {
     flex: 1;
     overflow: hidden;
     position: relative;
+<<<<<<< HEAD
     background: rgba(0, 0, 0, 0.2);
+=======
+    background: #1a1a1e;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     display: flex;
     align-items: center;
     justify-content: center;
@@ -298,9 +329,13 @@ body {
 /* ═══ SETTINGS PANEL ═══ */
 .settings-panel {
     width: var(--panel-w);
+<<<<<<< HEAD
     background: rgba(10, 10, 12, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--bg-surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-left: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
@@ -612,18 +647,25 @@ body {
 }
 
 .draw-hub-header {
+<<<<<<< HEAD
     padding: 1.5rem 2rem;
+=======
+    padding: 2rem 2rem 0;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
+<<<<<<< HEAD
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-subtle);
     border-radius: 16px;
     margin: 2rem 2rem 0;
+=======
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 }
 
 .draw-hub-brand {
@@ -716,11 +758,17 @@ body {
 }
 
 .draw-card {
+<<<<<<< HEAD
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-light);
     border-radius: 16px;
+=======
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     overflow: hidden;
     cursor: pointer;
     transition: 0.25s;
@@ -920,4 +968,8 @@ body {
     .draw-hub-grid {
         grid-template-columns: 1fr 1fr;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8

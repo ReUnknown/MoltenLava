@@ -206,6 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (restoreSelection()) exec('hiliteColor', e.target.value);
         };
     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 
     // --- LINK ---
     if (btnLink) {
@@ -228,6 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+=======
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
 
     // --- FILE MENU ---
     if (fileMenuBtn) fileMenuBtn.onclick = (e) => { e.stopPropagation(); closeAllDropdowns(); fileMenu.classList.toggle('hidden'); };

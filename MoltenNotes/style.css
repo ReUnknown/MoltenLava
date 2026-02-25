@@ -41,6 +41,7 @@ body {
     display: none !important;
 }
 
+<<<<<<< HEAD
 /* ========== V4 AMBIENT GLOW ========== */
 .ambient-glow { display: none;
     position: fixed;
@@ -76,6 +77,11 @@ body {
     min-height: 100vh;
     position: relative;
     z-index: 1;
+=======
+/* ═══ HUB ═══ */
+.notes-hub {
+    min-height: 100vh;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 }
 
 .hub-header {
@@ -85,12 +91,16 @@ body {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
+<<<<<<< HEAD
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-s);
     border-radius: 16px;
     margin: 1.5rem 2rem 0;
+=======
+    border-bottom: 1px solid var(--border);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 }
 
 .hub-brand {
@@ -178,9 +188,13 @@ body {
     left: 0;
     min-width: 180px;
     margin-top: 4px;
+<<<<<<< HEAD
     background: rgba(26, 26, 30, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--elevated);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 6px;
@@ -265,11 +279,15 @@ body {
 
 /* Note Cards */
 .note-card {
+<<<<<<< HEAD
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border);
+=======
+    border-radius: 12px;
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     cursor: pointer;
     transition: 0.25s;
     position: relative;
@@ -570,9 +588,13 @@ body {
 
 .editor-top {
     height: 52px;
+<<<<<<< HEAD
     background: rgba(26, 26, 30, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -629,9 +651,13 @@ body {
 
 /* Formatting Toolbar */
 .fmt-bar {
+<<<<<<< HEAD
     background: rgba(26, 26, 30, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -736,9 +762,13 @@ body {
 /* Widget Panel */
 .widget-panel {
     width: 200px;
+<<<<<<< HEAD
     background: rgba(26, 26, 30, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+=======
+    background: var(--surface);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
     border-left: 1px solid var(--border);
     overflow-y: auto;
     flex-shrink: 0;
@@ -1022,4 +1052,8 @@ body {
     .note-paper {
         min-height: 140px;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8

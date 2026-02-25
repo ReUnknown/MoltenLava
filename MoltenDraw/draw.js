@@ -296,7 +296,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
+<<<<<<< HEAD
         ctx.lineTo(drawX, drawY);
+=======
+<<<<<<< HEAD
+        ctx.lineTo(drawX, drawY);
+=======
+
+        // Quadratic curve for smoother lines
+        const mx = (lastX + drawX) / 2;
+        const my = (lastY + drawY) / 2;
+        ctx.quadraticCurveTo(lastX, lastY, mx, my);
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
         ctx.stroke();
 
         lastX = drawX;
@@ -712,9 +724,21 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('JSON exported!');
     };
 
+<<<<<<< HEAD
     btnImportJSON.onclick = async () => {
         fileMenu.classList.add('hidden');
         if (!await AppModal.confirm('Import will replace your current canvas. Continue?', 'Import Notice')) return;
+=======
+<<<<<<< HEAD
+    btnImportJSON.onclick = async () => {
+        fileMenu.classList.add('hidden');
+        if (!await AppModal.confirm('Import will replace your current canvas. Continue?', 'Import Notice')) return;
+=======
+    btnImportJSON.onclick = () => {
+        fileMenu.classList.add('hidden');
+        if (!confirm('Import will replace your current canvas. Continue?')) return;
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
         jsonInput.click();
     };
 
@@ -753,9 +777,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 'image/png');
     };
 
+<<<<<<< HEAD
     btnNewCanvas.onclick = async () => {
         fileMenu.classList.add('hidden');
         if (!await AppModal.confirm('Clear canvas and start fresh?', 'New Canvas')) return;
+=======
+<<<<<<< HEAD
+    btnNewCanvas.onclick = async () => {
+        fileMenu.classList.add('hidden');
+        if (!await AppModal.confirm('Clear canvas and start fresh?', 'New Canvas')) return;
+=======
+    btnNewCanvas.onclick = () => {
+        fileMenu.classList.add('hidden');
+        if (!confirm('Clear canvas and start fresh?')) return;
+>>>>>>> 1fd25a3d3770c0376e20448cbdcafd0540a99ea0
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
         pushUndo();
         layers = []; activeLayerIdx = 0; addLayer('Background', true);
         renderLayers(); renderLayerList();
@@ -807,8 +843,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     title: 'Untitled Drawing',
                     date: new Date().toLocaleDateString(),
                     thumbnail: thumb.toDataURL('image/jpeg', 0.6),
+<<<<<<< HEAD
                     layerCount: layers.length,
                     layers: layers.map(l => ({ name: l.name, visible: l.visible, opacity: l.opacity, data: l.canvas.toDataURL('image/png') }))
+=======
+                    layerCount: layers.length
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
                 };
                 let projects = [];
                 try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { projects = []; }
@@ -838,6 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ━━━ INIT ━━━
+<<<<<<< HEAD
     async function initLoader() {
         const pid = getProjectId();
         let projects = [];
@@ -870,4 +911,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initLoader();
+=======
+    fitCanvas();
+    updateToolSettings();
+    pushUndo();
+    window.addEventListener('resize', fitCanvas);
+>>>>>>> 08e2c62dffa3f4807420f6dac59af6bc096bbbc8
 });
