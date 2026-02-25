@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LavaAI - Fast, configurable, multi-model AI chats">
+    <title>LavaAI — Hub</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23c084fc' d='M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L5.4 7.86l6.6 3.71 6.6-3.71L12 4.15zM4.5 9.1v6.52l6.5 3.66v-6.52L4.5 9.1zm15 6.52V9.1l-6.5 3.66v6.52l6.5-3.66z'/></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="hub-body">
+    <header class="hub-header">
+        <div class="hub-header-left">
+            <svg class="hub-logo" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L5.4 7.86l6.6 3.71 6.6-3.71L12 4.15zM4.5 9.1v6.52l6.5 3.66v-6.52L4.5 9.1zm15 6.52V9.1l-6.5 3.66v6.52l6.5-3.66z" />
+            </svg>
+            <h1 class="hub-title">Lava<span>AI</span></h1>
+        </div>
+        <div class="hub-header-right">
+            <button class="btn btn-outline" onclick="openSettings()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6C15.6,13.98,13.98,15.6,12,15.6z" />
+                </svg>
+                Settings
+            </button>
+            <a href="../index.html" class="btn btn-outline">&larr; Suite</a>
+        </div>
+    </header>
+
+    <main class="hub-main">
+        <!-- Dashboard Toolbar -->
+        <div class="hub-toolbar">
+            <button class="btn btn-primary" onclick="createNewChat()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                New Chat
+            </button>
+            <button class="btn btn-outline" onclick="openCompareMode()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M15 15V8H9v7h6zm0-9h2v10H7V6h8zm-1 3v4h-4V9h4zM8 4h10v2h-2V5H9v1H8V4zm-2 2h2v2H6V6zm0 14h10v-2h2v3H6v-3h2v2z" />
+                </svg>
+                Compare Models
+            </button>
+        </div>
+
+        <!-- Chat Grid -->
+        <div class="chat-grid" id="chatGrid">
+            <!-- Rendered via JS -->
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" />
+            </svg>
+            <h3>No conversations yet</h3>
+            <p>Start a new chat to begin exploring models.</p>
+        </div>
+    </main>
+
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2>LavaAI Settings</h2>
+
+            <div class="setting-group">
+                <label>OpenRouter API Key</label>
+                <div style="margin-top: 8px;">
+                    <button class="btn btn-primary"
+                        onclick="AppModal.requestGlobalApiKey().then(k => { if(k) closeSettings(); })">Update Global
+                        Key</button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label>Danger Zone</label>
+                <button class="btn btn-danger" onclick="deleteAllChats()">Delete All Chats</button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeSettings()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../shared_modal.js"></script>
+    <script src="hub.js"></script>
+</body>
+
+</html>

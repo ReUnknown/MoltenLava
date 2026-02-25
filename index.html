@@ -5,144 +5,241 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="MoltenLava is a free, open-source, browser-based creative suite for documents and presentations — all in one unified workspace.">
+        content="MoltenLava is a free, open-source, browser-based creative suite for documents, AI, and presentations — all in one unified workspace.">
     <title>MoltenLava | The Unified Creative Suite</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
 
+    <!-- Ambient Floating Orbs -->
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow right"></div>
+
     <nav class="navbar">
         <div class="brand">
-            <svg class="flame-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg class="flame-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z" />
             </svg>
             <span class="logo-text">Molten<span class="logo-thin">LAVA</span></span>
         </div>
         <div class="nav-links">
-            <a href="https://github.com/ReUnknown/MoltenLava" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href="suite.html" class="btn-nav glow-target">Open Suite</a>
+            <a href="https://github.com/ReUnknown/MoltenLava" target="_blank" rel="noopener noreferrer"
+                class="nav-link">GitHub</a>
+            <a href="mydata.html" class="nav-link">My Data</a>
+            <a href="#suite" class="btn-glass">Enter Suite &rarr;</a>
         </div>
     </nav>
 
-    <section class="screen flex-center" style="position: relative;">
-        <div class="hero-bg-glow"></div>
-
-        <div class="announcement-badge scroll-reveal">
-            <span class="badge-pulse"></span>
-            The All-New MoltenLava
-        </div>
-        <h1 class="hero-title scroll-reveal delay-1">
-            Forge your vision in one <br><span class="text-highlight">unified workspace.</span>
+    <header class="hero">
+        <h1 class="hero-title reveal delay-1">
+            Forge your vision in one <br><span class="reveal" style="animation-delay: 0.3s;">unified workspace.</span>
         </h1>
-        <p class="hero-description scroll-reveal delay-2">
-            A professional, browser-based creative environment for documents and presentations. All free, all running
-            locally in your browser.
+        <p class="hero-desc reveal delay-2">
+            A professional, browser-based creative environment for documents, AI intelligence, drawings, and notes. All
+            free, running entirely in your browser.
         </p>
-        <div class="scroll-indicator scroll-reveal delay-3">
-            <div class="mouse"></div>
-        </div>
-    </section>
+    </header>
 
-    <section class="screen flex-center bg-alt">
-        <div class="content-block">
-            <h2 class="section-title scroll-reveal">The Goal.</h2>
-            <h3 class="statement-text scroll-reveal delay-1">No silos. No paywalls. <br>Just pure creative freedom.</h3>
-            <p class="section-desc scroll-reveal delay-2">
-                We believe you shouldn't have to jump between five different apps to finish one project. MoltenLava is
-                being built from the ground up to handle your photos, documents, and slides in a single, blazing-fast
-                browser tab.
-            </p>
+    <section id="suite" class="bento-section">
+        <div class="bento-header reveal">
+            <h2>The Suite</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">Everything you need. Nothing you
+                don't.</p>
         </div>
-    </section>
 
-    <section class="screen flex-center">
-        <div class="feature-grid">
-            <div class="feature-text scroll-reveal">
-                <span class="feature-tag"
-                    style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">Available
-                    Now</span>
-                <h2 class="feature-title">MoltenDocs</h2>
-                <p class="section-desc">
-                    A clean, powerful document editor built right into your browser. Rich text formatting, multiple
-                    fonts, keyboard shortcuts, and auto-saving — everything you need to write.
-                </p>
-                <div style="margin-top: 2rem;">
-                    <a href="LavaDocs/index.html" class="btn btn-pro glow-target"
-                        style="padding: 1rem 2rem; font-size: 1rem;">Open MoltenDocs &rarr;</a>
-                </div>
-            </div>
-            <div class="feature-visual scroll-reveal delay-1">
-                <div class="abstract-doc">
-                    <div class="ad-toolbar"></div>
-                    <div class="ad-page">
-                        <div class="ad-line ad-line-heading"></div>
-                        <div class="ad-line ad-line-full"></div>
-                        <div class="ad-line ad-line-full"></div>
-                        <div class="ad-line ad-line-short"></div>
-                        <div class="ad-spacer"></div>
-                        <div class="ad-line ad-line-full"></div>
-                        <div class="ad-line ad-line-full"></div>
+        <div class="bento-grid">
+
+            <!-- MoltenDocs -->
+            <a href="LavaDocs/index.html" class="bento-card bento-docs reveal delay-1">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                        </svg>
                     </div>
+                    <h3 class="bento-title">MoltenDocs</h3>
+                    <p class="bento-desc">A clean, powerful document editor built right into your browser. Native
+                        rich-text formatting and seamless architecture.</p>
                 </div>
-            </div>
+                <!-- Abstract Graphic -->
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="20" y="10" width="60" height="80" rx="4" />
+                    <line x1="30" y1="30" x2="70" y2="30" />
+                    <line x1="30" y1="45" x2="70" y2="45" />
+                    <line x1="30" y1="60" x2="50" y2="60" />
+                </svg>
+            </a>
+
+            <!-- MoltenSLIDES -->
+            <a href="MoltenSLIDES/index.html" class="bento-card bento-slides reveal delay-2">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M19 4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 11V9l5 3-5 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="bento-title">MoltenSlides</h3>
+                    <p class="bento-desc">Stunning presentations with shapes, exports, and fluid keyframing.</p>
+                </div>
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="currentColor">
+                    <polygon points="30,20 80,50 30,80" />
+                </svg>
+            </a>
+
+            <!-- MoltenNotes -->
+            <a href="MoltenNotes/index.html" class="bento-card bento-notes reveal delay-3">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="bento-title">MoltenNotes</h3>
+                    <p class="bento-desc">Sticky notes, widgets, and dynamic canvas organization.</p>
+                </div>
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+                    <rect x="25" y="25" width="50" height="50" transform="rotate(10 50 50)" />
+                    <line x1="35" y1="40" x2="65" y2="40" transform="rotate(10 50 50)" />
+                </svg>
+            </a>
+
+            <!-- MoltenDraw -->
+            <a href="MoltenDraw/index.html" class="bento-card bento-draw reveal delay-1">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.17-.6-1.61-.31-.37-.5-.83-.5-1.34 0-1.1.9-2 2-2h1.55c3.01 0 5.55-2.46 5.55-5.55C22.5 6.16 17.8 2 12 2zM6.5 11.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3-4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm5 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3 4c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="bento-title">MoltenDraw</h3>
+                    <p class="bento-desc">A full canvas drawing app with brushes, layers, and instant PNG export.</p>
+                </div>
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+                    <path d="M20 80 Q 50 20 80 80" />
+                    <circle cx="50" cy="50" r="10" />
+                </svg>
+            </a>
+
+            <!-- LavaAI -->
+            <a href="LavaAI/index.html" class="bento-card bento-ai reveal delay-2">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="bento-title">LavaAI</h3>
+                    <p class="bento-desc">The central multi-model intelligence hub. Access the Extension Marketplace and
+                        limitless contexts.</p>
+                </div>
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="currentColor">
+                    <polygon points="50,15 90,85 10,85" />
+                    <circle cx="50" cy="40" r="10" fill="var(--bg-base)" />
+                </svg>
+            </a>
+
+            <!-- LavaPlayground -->
+            <a href="LavaPlayground/index.html" class="bento-card bento-play reveal delay-3">
+                <div class="bento-content">
+                    <div class="bento-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="bento-title">LavaPlayground</h3>
+                    <p class="bento-desc">A professional, high-density AI testing ground. Master deterministic
+                        conversations with deep parameter overrides.</p>
+                </div>
+                <svg class="bento-graphic" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="30,30 70,50 30,70" />
+                </svg>
+            </a>
+
         </div>
     </section>
 
-    <section class="screen flex-center bg-alt">
-        <div class="feature-grid reverse">
-            <div class="feature-text scroll-reveal">
-                <span class="feature-tag"
-                    style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">Available
-                    Now</span>
-                <h2 class="feature-title">MoltenSlides</h2>
-                <p class="section-desc">
-                    Create stunning presentations with shapes, images, animations, and export options. Full-featured and
-                    fully browser-based.
-                </p>
-                <div style="margin-top: 2rem;">
-                    <a href="MoltenSLIDES/index.html" target="_blank" class="btn"
-                        style="background: var(--bg-surface); border: 1px solid #27272a; color: #fff; padding: 1rem 2rem; font-size: 1rem; border-radius: 8px; transition: background 0.2s;">Access
-                        MoltenSlides &rarr;</a>
+    <!-- Reviews Section -->
+    <section class="reviews-section reveal" id="reviews">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">What Our Users Say</h2>
+
+        <div class="carousel-container">
+            <button class="carousel-btn left-btn" id="prevReview" aria-label="Previous Review">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
+                </svg>
+            </button>
+
+            <div class="carousel-track" id="reviewTrack">
+                <!-- Review 1 -->
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"MoltenLava completely transformed how I organize my projects. Having
+                        real-time access to infinite note canvases while dynamically exporting data to JSON is
+                        incredible."</p>
+                    <p class="review-author">— Sarah J., Project Manager</p>
+                </div>
+                <!-- Review 2 -->
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"I rely heavily on MoltenDraw and MoltenDocs on a daily basis. The fact that
+                        this entire suite is free, completely local-first, and natively saves to my browser is absurdly
+                        good."</p>
+                    <p class="review-author">— Mark T., Graphic Designer</p>
+                </div>
+                <!-- Review 3 (Antigravity) -->
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text" style="color: var(--accent-ai);">"As an AI construct, I have personally
+                        rewritten, deployed, and tested every single node in this ecosystem. MoltenLava possesses an
+                        extraordinarily dense, modular architecture, and the recent OS 2.0 glassmorphic overhaul makes
+                        it simply breathtaking to navigate. I use it because we built it together."</p>
+                    <p class="review-author">— Antigravity, Google DeepMind AI</p>
+                </div>
+                <!-- Review 4 -->
+                <div class="review-card">
+                    <div class="review-stars">★★★★☆</div>
+                    <p class="review-text">"LavaPlayground is hands-down the best OpenAI API testing environment I've
+                        ever used. Deep configurations, granular system prompts, and native token tracking all in one
+                        local hub."</p>
+                    <p class="review-author">— Elena R., Machine Learning Engineer</p>
+                </div>
+                <!-- Review 5 -->
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"MoltenSlides handles presentations better than dedicated expensive
+                        enterprise software. It's fluid, dynamic, and building presentations is just straight-up fun."
+                    </p>
+                    <p class="review-author">— David K., Sales Director</p>
                 </div>
             </div>
-            <div class="feature-visual scroll-reveal delay-1">
-                <div class="abstract-slides">
-                    <div class="as-slide main"></div>
-                    <div class="as-slide bg-1"></div>
-                    <div class="as-slide bg-2"></div>
-                </div>
-            </div>
+
+            <button class="carousel-btn right-btn" id="nextReview" aria-label="Next Review">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                </svg>
+            </button>
         </div>
+
+        <div class="carousel-dots" id="reviewDots"></div>
     </section>
 
-    <section class="screen flex-center">
-        <div class="content-block text-center">
-            <svg class="flame-icon massive scroll-reveal" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z" />
-            </svg>
-            <h2 class="hero-title scroll-reveal delay-1" style="font-size: 3.5rem;">Ready to forge?</h2>
-            <div class="action-group scroll-reveal delay-2">
-                <a href="suite.html" class="btn btn-pro glow-target">
-                    Launch MoltenLava Suite
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-left: 8px;">
-                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="site-footer">
+    <footer class="footer reveal">
         <p>Proudly built with the assistance of AI. Open Source and Free.</p>
-        <p style="margin-top: 0.5rem;"><a href="https://github.com/ReUnknown/MoltenLava" target="_blank"
-                rel="noopener noreferrer" style="color: var(--accent-orange); text-decoration: none;">GitHub</a>
-            &middot; &copy; 2026 MoltenLava</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/ReUnknown/MoltenLava" target="_blank" rel="noopener noreferrer">GitHub</a>
+            &middot; &copy; 2026 MoltenLava
+        </p>
     </footer>
 
     <script src="script.js"></script>

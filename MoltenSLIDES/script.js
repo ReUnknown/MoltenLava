@@ -117,17 +117,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!grid) return;
         grid.innerHTML = "";
 
-        // A. Create "New Slide" Card
+        // A. Remove manual "New Slide" card injection (already handled within index.html statically)
+        // Ensure we wipe any old injected grid data
+        // We will natively inject the New Blank deck back in via JS
+        grid.innerHTML = "";
+
         const newCard = document.createElement('div');
-        newCard.className = 'card card-new glow-target scroll-reveal'; // Added animation class
-        newCard.innerHTML = `
-            <div style="background: rgba(255, 94, 58, 0.1); border-radius: 50%; padding: 12px; margin-bottom: 1rem; border: 1px solid rgba(255, 94, 58, 0.2);">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--accent-orange)"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </div>
-            <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem; color: var(--text-main);">New Blank Deck</h3>
-            <p style="font-size: 0.85rem; margin: 0; color: var(--text-faint);">Start from scratch</p>
-        `;
         newCard.onclick = createNewDeck;
+        newCard.style.cursor = 'pointer';
+        newCard.className = 'slides-card';
+        newCard.style.borderStyle = 'dashed';
+        newCard.style.background = 'rgba(59, 130, 246, 0.05)';
+        newCard.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+        newCard.innerHTML = `
+            <div class="slides-card-preview" style="background: transparent;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--accent-blue)" style="opacity: 0.8;">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+            </div>
+            <div class="slides-card-info" style="text-align: center; border-top: none;">
+                <h3 class="slides-card-title" style="color: var(--accent-blue);">New Blank Deck</h3>
+                <div class="slides-card-meta">Start defining a new presentation stack</div>
+            </div>
+        `;
         grid.appendChild(newCard);
 
         // B. Render Existing Slides
@@ -135,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filteredSlides.length === 0) {
             const empty = document.createElement('div');
-            empty.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;';
+            empty.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; border-radius: 20px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); margin-top: 1rem;';
             empty.innerHTML = `
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--text-faint)" style="margin-bottom: 1rem;">
                     <path d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z"/>
@@ -147,40 +159,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         filteredSlides.forEach((slide, index) => {
+            const delay = index * 0.1;
             const el = document.createElement('div');
-            // Added animation classes with cascading delays
-            const delayClass = index < 3 ? `delay-${index + 1}` : 'delay-3';
-            el.className = `card file-card glow-target scroll-reveal ${delayClass}`;
+            el.className = 'slides-card';
+            el.style.animationDelay = `${delay}s`;
 
-            el.onclick = (e) => {
-                if (e.target.closest('.card-menu-btn') || e.target.closest('.menu-dropdown')) return;
-                window.location.href = `Slides/index.html?id=${slide.id}`; // Fixed path if it's in a subfolder
-            };
-
-            const scale = 0.23;
-            const previewPage = slide.pages && slide.pages[0] ? slide.pages[0] : null;
-            const previewElements = previewPage ? previewPage.elements : [];
+            const firstPageElements = slide.pages && slide.pages[0] ? slide.pages[0].elements : [];
+            const firstPage = slide.pages && slide.pages[0] ? slide.pages[0] : null;
 
             el.innerHTML = `
-                <button class="card-menu-btn" onclick="window.toggleMenu(event, ${slide.id})">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="pointer-events: none;"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                </button>
-                
-                <div class="menu-dropdown hidden" id="menu-${slide.id}" style="right: 12px; top: 48px;">
-                    <div class="menu-item" onclick="window.triggerRename(event, ${slide.id}, '${slide.title.replace(/'/g, "\\'")}')">Rename</div>
-                    <div class="context-divider"></div>
-                    <div class="menu-item danger" onclick="window.triggerDelete(event, ${slide.id}, '${slide.title.replace(/'/g, "\\'")}')">Delete</div>
-                </div>
-                
-                <div class="card-thumb">
-                    <div style="width: 1280px; height: 720px; transform: scale(${scale}); transform-origin: top left; pointer-events: none;">
-                        ${generatePreviewHTML(previewElements, previewPage)}
+                <div class="slides-card-preview" style="cursor:pointer;" onclick="window.location.href='Slides/index.html?id=${slide.id}'" oncontextmenu="window.toggleMenu(event, ${slide.id})">
+                    <div style="position: absolute; top: 0; left: 0; transform: scale(0.22); transform-origin: top left; width: 1280px; height: 720px; background: ${firstPage && firstPage.background ? firstPage.background : '#fff'}; pointer-events: none;">
+                        ${generatePreviewHTML(firstPageElements, firstPage)}
                     </div>
                 </div>
-                
-                <div class="card-body">
-                    <h4 class="card-title">${slide.title}</h4>
-                    <p class="card-meta">${slide.date}</p>
+                <div class="slides-card-info" style="cursor:pointer;" onclick="window.location.href='Slides/index.html?id=${slide.id}'" oncontextmenu="window.toggleMenu(event, ${slide.id})">
+                    <h3 class="slides-card-title">${slide.title}</h3>
+                    <div class="slides-card-meta">Updated: ${slide.date || 'Unknown'}</div>
+                </div>
+                <button class="card-menu-btn" onclick="window.toggleMenu(event, ${slide.id})">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="5" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="12" cy="19" r="2" />
+                    </svg>
+                </button>
+                <div class="menu-dropdown hidden" id="menu-${slide.id}" style="right: 12px; top: 48px; position:absolute; z-index:50;">
+                    <div class="menu-item" onclick="window.triggerRename(event, ${slide.id}, '${slide.title.replace(/'/g, "\\'")}')">Rename</div>
+                    <div class="menu-item" onclick="window.triggerDuplicate(event, ${slide.id})">Duplicate</div>
+                    <div class="context-divider"></div>
+                    <div class="menu-item danger" onclick="window.triggerDelete(event, ${slide.id}, '${slide.title.replace(/'/g, "\\'")}')">Delete</div>
                 </div>
             `;
             grid.appendChild(el);
@@ -212,9 +220,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.toggleMenu = (e, id) => {
+        e.preventDefault();
         e.stopPropagation();
         document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden'));
         document.getElementById(`menu-${id}`)?.classList.toggle('hidden');
+    };
+
+    window.triggerDuplicate = (e, id) => {
+        e.stopPropagation();
+        document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.add('hidden'));
+        const slideToCopy = slides.find(s => s.id === id);
+        if (slideToCopy) {
+            const newId = Date.now();
+            const copy = JSON.parse(JSON.stringify(slideToCopy));
+            copy.id = newId;
+            copy.title = copy.title + " (Copy)";
+            copy.date = new Date().toLocaleDateString();
+            slides.unshift(copy);
+            saveToStorage();
+            render(searchInput.value);
+        }
     };
 
     // --- Custom Modal Wiring ---

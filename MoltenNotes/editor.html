@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoltenNotes — Editor</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700;800&family=Caveat:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="note-editor-shell">
+        <!-- Top Bar -->
+        <div class="editor-top">
+            <a href="index.html" class="ed-btn" title="Back" style="color:#f59e0b;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                </svg>
+            </a>
+            <input class="ed-title-input" id="titleInput" placeholder="Untitled Note" spellcheck="false">
+            <div class="ed-divider"></div>
+            <!-- File menu -->
+            <div style="position:relative;">
+                <button class="ed-btn" id="fileMenuBtn" title="File">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                    </svg>
+                </button>
+                <div class="file-dropdown hidden" id="fileDropdown">
+                    <div class="fd-item" id="fdExportNote">Export Note</div>
+                    <div class="fd-item" id="fdImportNote">Import Note</div>
+                    <div class="fd-sep"></div>
+                    <div class="fd-item" id="fdColor">Color</div>
+                </div>
+            </div>
+            <select id="catSelect" class="fmt-select" title="Category"></select>
+            <div class="ed-divider"></div>
+            <span id="autoSaveLabel" style="font-size:0.7rem;color:var(--faint);">Saved</span>
+        </div>
+
+        <!-- Format Toolbar -->
+        <div class="fmt-bar">
+            <button class="fmt-btn" id="btnBold" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+            <button class="fmt-btn" id="btnItalic" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+            <button class="fmt-btn" id="btnUnderline" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+            <button class="fmt-btn" id="btnStrike" onclick="fmt('strikeThrough')"
+                title="Strikethrough"><s>S</s></button>
+            <div class="ed-divider"></div>
+            <button class="fmt-btn" id="btnUl" onclick="fmt('insertUnorderedList')" title="Bullet List">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z" />
+                </svg>
+            </button>
+            <button class="fmt-btn" id="btnOl" onclick="fmt('insertOrderedList')" title="Numbered List">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z" />
+                </svg>
+            </button>
+            <div class="ed-divider"></div>
+            <select id="formatBlockSelect" class="fmt-select" onchange="fmtBlock(this.value);this.value='';"
+                title="Heading">
+                <option value="">Heading</option>
+                <option value="h1">H1</option>
+                <option value="h2">H2</option>
+                <option value="h3">H3</option>
+                <option value="p">Paragraph</option>
+            </select>
+            <div class="ed-divider"></div>
+            <select id="fontNameSelect" class="fmt-select" onchange="fmt('fontName', this.value);this.value='';"
+                title="Font">
+                <option value="">Font</option>
+                <option value="Inter">Inter</option>
+                <option value="Caveat">Caveat</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Courier New">Courier</option>
+            </select>
+            <div class="ed-divider"></div>
+            <button class="fmt-btn" onclick="insertHighlight()" title="Highlight"
+                style="background:#fef08a;color:#333;border-radius:4px;width:28px;height:28px;">H</button>
+            <button class="fmt-btn" onclick="insertLink()" title="Insert Link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                </svg>
+            </button>
+            <div class="ed-divider"></div>
+            <button class="fmt-btn" id="dragModeBtn" onclick="toggleDragMode()" title="Drag Mode">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Color picker (hidden, shown from File>Color) -->
+        <div class="note-settings hidden" id="noteSettings">
+            <div class="setting-row">
+                <span class="setting-label">Color</span>
+                <div class="color-dots" id="colorDots"></div>
+            </div>
+        </div>
+
+        <!-- Editor body -->
+        <div class="editor-body">
+            <div class="editor-content" id="editorContent" contenteditable="true"></div>
+
+            <!-- Widget panel (desktop) -->
+            <div class="widget-panel" id="widgetPanel">
+                <div class="widget-panel-label">Widgets</div>
+                <button class="widget-btn" onclick="insertWidget('timer')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0012 4c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+                    </svg>
+                    Timer
+                </button>
+                <button class="widget-btn" onclick="insertWidget('todo')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z" />
+                    </svg>
+                    Todo List
+                </button>
+                <button class="widget-btn" onclick="insertWidget('counter')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
+                    </svg>
+                    Counter
+                </button>
+                <button class="widget-btn" onclick="insertWidget('habit')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z" />
+                    </svg>
+                    Habit Tracker
+                </button>
+                <button class="widget-btn" onclick="insertWidget('dice')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7.5 7.5h2v2h-2zm0 7h2v2h-2zm7-7h2v2h-2zm0 7h2v2h-2zm-3.5-3.5h2v2h-2z" />
+                    </svg>
+                    Dice
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context menu for widgets -->
+    <div class="widget-context-menu hidden" id="widgetCtx">
+        <div class="ctx-item" id="ctxRename">Rename</div>
+        <div class="ctx-item" id="ctxRecolor">Recolor</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item ctx-danger" id="ctxDelete">Delete</div>
+    </div>
+
+    <input type="file" id="fileImportInput" accept=".json" style="display:none;" onchange="importNote(event)">
+
+    <script src="../shared_modal.js"></script>
+    <script>
+        const STORAGE_KEY = 'moltenNotes_v1';
+        const STICKY_COLORS = ['#fef08a', '#fca5a5', '#86efac', '#93c5fd', '#c4b5fd', '#fdba74'];
+        const TRI_COLORS = ['#93c5fd', '#c4b5fd', '#fca5a5', '#86efac', '#fde68a', '#fdba74'];
+        const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        const WIDGET_COLORS = ['#f59e0b', '#06b6d4', '#10b981', '#ef4444', '#8b5cf6', '#f97316'];
+
+        let note = null;
+        let saveTimer = null;
+        let dragMode = false;
+        let dragTarget = null;
+        let dragOffX = 0, dragOffY = 0;
+        let activeAlarm = null;
+        let ctxWidget = null;
+        const editorContent = document.getElementById('editorContent');
+        const titleInput = document.getElementById('titleInput');
+
+        // ━━━ INIT ━━━
+        function init() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            const store = getStore();
+            note = store.notes.find(n => n.id === id);
+            if (!note) { window.location.href = 'index.html'; return; }
+
+            titleInput.value = note.title || '';
+            editorContent.innerHTML = note.content || '';
+
+            // Restore widget states from DOM
+            document.querySelectorAll('.we-timer-display').forEach(el => {
+                const wid = el.id.replace('td_', '');
+                const text = el.textContent || '00:00:00';
+                const parts = text.split(':').map(Number);
+                const secs = (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+                timers[wid] = { total: Math.max(secs, 300), remaining: secs, interval: null };
+            });
+
+            // Apply type styling
+            if (note.type === 'sticky') {
+                editorContent.classList.add('sticky-editor');
+                editorContent.style.setProperty('--note-bg', note.color || '#fef08a');
+            } else if (note.type === 'paper') {
+                editorContent.classList.add('paper-editor');
+            } else if (note.type === 'triangle') {
+                editorContent.classList.add('triangle-editor');
+                editorContent.style.setProperty('--note-bg', note.color || '#93c5fd');
+            }
+
+            // Category select
+            const catSelect = document.getElementById('catSelect');
+            catSelect.innerHTML = '<option value="">No Category</option>';
+            store.categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = c.name;
+                catSelect.appendChild(opt);
+            });
+            catSelect.value = note.category || '';
+            catSelect.onchange = () => { note.category = catSelect.value; save(); };
+
+            // Color dots
+            renderColors();
+
+            // Auto-save
+            titleInput.oninput = () => { note.title = titleInput.value; autoSave(); };
+            editorContent.oninput = () => autoSave();
+
+            // Link click handling
+            editorContent.addEventListener('click', handleLinkClick);
+            editorContent.addEventListener('dblclick', handleLinkDblClick);
+
+            // Selection sync for toolbar
+            document.addEventListener('selectionchange', syncToolbar);
+
+            // Widget state persistence delegator
+            editorContent.addEventListener('input', (e) => {
+                if (e.target.tagName === 'INPUT' && e.target.closest('.widget-embed')) {
+                    if (e.target.type === 'checkbox') {
+                        if (e.target.checked) e.target.setAttribute('checked', 'checked');
+                        else e.target.removeAttribute('checked');
+                    } else {
+                        e.target.setAttribute('value', e.target.value);
+                    }
+                    autoSave();
+                }
+            });
+
+            // File menu
+            document.getElementById('fileMenuBtn').onclick = (e) => {
+                e.stopPropagation();
+                document.getElementById('fileDropdown').classList.toggle('hidden');
+            };
+            document.getElementById('fdExportNote').onclick = exportNote;
+            document.getElementById('fdImportNote').onclick = () => document.getElementById('fileImportInput').click();
+            document.getElementById('fdColor').onclick = () => {
+                document.getElementById('noteSettings').classList.toggle('hidden');
+                document.getElementById('fileDropdown').classList.add('hidden');
+            };
+            // document.getElementById('importInput').onchange = importNote; // Removed as onchange is now on the input element
+
+            // Close menus on click
+            document.addEventListener('click', () => {
+                document.getElementById('fileDropdown').classList.add('hidden');
+                document.getElementById('widgetCtx').classList.add('hidden');
+            });
+
+            // Widget context menu
+            document.getElementById('ctxRename').onclick = () => renameWidget();
+            document.getElementById('ctxRecolor').onclick = () => recolorWidget();
+            document.getElementById('ctxDelete').onclick = () => deleteWidget();
+
+            // Right-click on widgets
+            editorContent.addEventListener('contextmenu', (e) => {
+                const w = e.target.closest('.widget-embed');
+                if (w) {
+                    e.preventDefault();
+                    ctxWidget = w;
+                    const ctx = document.getElementById('widgetCtx');
+                    ctx.style.left = e.clientX + 'px';
+                    ctx.style.top = e.clientY + 'px';
+                    ctx.classList.remove('hidden');
+                }
+            });
+
+            // Drag mode for widgets
+            editorContent.addEventListener('pointerdown', handleWidgetDragStart);
+            document.addEventListener('pointermove', handleWidgetDragMove);
+            document.addEventListener('pointerup', handleWidgetDragEnd);
+
+            // Reattach widget event listeners
+            reattachWidgetListeners();
+        }
+
+        function handleLinkClick(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const href = e.target.getAttribute('href');
+                if (href && !href.startsWith('note:')) {
+                    window.open(href, '_blank');
+                }
+            }
+        }
+        function handleLinkDblClick(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const href = e.target.getAttribute('href');
+                if (href) {
+                    if (href.startsWith('note:')) {
+                        window.location.href = `editor.html?id=${href.slice(5)}`;
+                    } else {
+                        window.open(href, '_blank');
+                    }
+                }
+            }
+        }
+
+        function renderColors() {
+            const dots = document.getElementById('colorDots');
+            dots.innerHTML = '';
+            const colors = note.type === 'triangle' ? TRI_COLORS : note.type === 'sticky' ? STICKY_COLORS : [];
+            if (colors.length === 0) { document.getElementById('noteSettings').style.display = 'none'; return; }
+            colors.forEach(c => {
+                const d = document.createElement('div');
+                d.className = 'color-dot' + (note.color === c ? ' active' : '');
+                d.style.background = c;
+                d.onclick = () => {
+                    note.color = c;
+                    editorContent.style.setProperty('--note-bg', c);
+                    save(); renderColors();
+                };
+                dots.appendChild(d);
+            });
+        }
+
+        // ━━━ FORMATTING ━━━
+        window.fmt = (cmd, val = null) => { document.execCommand(cmd, false, val); syncToolbar(); };
+        window.fmtBlock = (tag) => { if (tag) document.execCommand('formatBlock', false, `<${tag}>`); syncToolbar(); };
+
+        function syncToolbar() {
+            if (document.activeElement !== editorContent) return;
+            document.getElementById('btnBold').classList.toggle('active', document.queryCommandState('bold'));
+            document.getElementById('btnItalic').classList.toggle('active', document.queryCommandState('italic'));
+            document.getElementById('btnUnderline').classList.toggle('active', document.queryCommandState('underline'));
+            document.getElementById('btnStrike').classList.toggle('active', document.queryCommandState('strikeThrough'));
+            document.getElementById('btnUl').classList.toggle('active', document.queryCommandState('insertUnorderedList'));
+            document.getElementById('btnOl').classList.toggle('active', document.queryCommandState('insertOrderedList'));
+
+            let block = document.queryCommandValue('formatBlock');
+            if (block) {
+                block = block.replace(/['"]/g, '').toLowerCase();
+                if (block === 'p' || block === 'div') block = '';
+                document.getElementById('formatBlockSelect').value = block;
+            } else {
+                document.getElementById('formatBlockSelect').value = '';
+            }
+
+            let font = document.queryCommandValue('fontName');
+            if (font) {
+                font = font.replace(/['"]/g, '');
+                const fontSelect = document.getElementById('fontNameSelect');
+                if (fontSelect && Array.from(fontSelect.options).some(o => o.value === font)) {
+                    fontSelect.value = font;
+                } else if (fontSelect) fontSelect.value = '';
+            }
+        }
+
+        window.insertHighlight = () => {
+            document.execCommand('hiliteColor', false, '#fef08a');
+        };
+
+        let savedRange = null;
+        function saveSelection() {
+            const sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) savedRange = sel.getRangeAt(0);
+        }
+        function restoreSelection() {
+            if (savedRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedRange);
+                return true;
+            }
+            return false;
+        }
+
+        window.insertLink = async () => {
+            saveSelection();
+            const linkChoice = await AppModal.selectItem([
+                { label: 'External Website URL', value: 'external' },
+                { label: 'Internal Note', value: 'internal' }
+            ], 'What kind of link would you like to create?', 'Insert Link');
+
+            if (!linkChoice) return;
+
+            let url = '';
+            if (linkChoice === 'external') {
+                url = await AppModal.prompt('Enter URL:', 'https://');
+                if (!url) return;
+                if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('mailto:') && !url.startsWith('note:')) {
+                    url = 'https://' + url;
+                }
+            } else {
+                try {
+                    const storeData = JSON.parse(localStorage.getItem('moltenNotes_v1')) || { notes: [] };
+                    const availableNotes = storeData.notes.filter(n => n.id != noteId).map(n => ({
+                        label: (n.icon ? `${n.icon} ` : '') + (n.title || 'Untitled Note'),
+                        value: 'note:n_' + n.id
+                    }));
+
+                    if (availableNotes.length === 0) {
+                        await AppModal.alert('You have no other notes to link to!', 'No Notes Found');
+                        return;
+                    }
+
+                    url = await AppModal.selectItem(availableNotes, 'Select a note to link to:', 'Choose Note');
+                    if (!url) return;
+                } catch (e) {
+                    console.error('Failed to load notes for linking', e);
+                    return;
+                }
+            }
+
+            restoreSelection();
+            document.execCommand('createLink', false, url);
+            const sel = window.getSelection();
+            if (sel.anchorNode) {
+                const a = sel.anchorNode.parentElement.closest('a') || sel.anchorNode.parentElement;
+                if (a && a.tagName === 'A' && !url.startsWith('note:')) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
+            }
+        };
+
+        // ━━━ DRAG MODE ━━━
+        window.toggleDragMode = () => {
+            dragMode = !dragMode;
+            document.getElementById('dragModeBtn').classList.toggle('active', dragMode);
+            editorContent.style.cursor = dragMode ? 'grab' : '';
+            document.querySelectorAll('.widget-embed').forEach(w => {
+                w.style.cursor = dragMode ? 'grab' : '';
+            });
+        };
+
+        function handleWidgetDragStart(e) {
+            if (!dragMode) return;
+            const w = e.target.closest('.widget-embed');
+            if (!w) return;
+            e.preventDefault();
+            dragTarget = w;
+            const rect = w.getBoundingClientRect();
+            dragOffX = e.clientX - rect.left;
+            dragOffY = e.clientY - rect.top;
+            // Make it absolutely positioned if not already
+            if (w.style.position !== 'absolute') {
+                const edRect = editorContent.getBoundingClientRect();
+                w.style.position = 'absolute';
+                w.style.left = (rect.left - edRect.left + editorContent.scrollLeft) + 'px';
+                w.style.top = (rect.top - edRect.top + editorContent.scrollTop) + 'px';
+            }
+            w.style.zIndex = '100';
+            w.style.cursor = 'grabbing';
+        }
+        function handleWidgetDragMove(e) {
+            if (!dragTarget) return;
+            const edRect = editorContent.getBoundingClientRect();
+            dragTarget.style.left = (e.clientX - edRect.left - dragOffX + editorContent.scrollLeft) + 'px';
+            dragTarget.style.top = (e.clientY - edRect.top - dragOffY + editorContent.scrollTop) + 'px';
+        }
+        function handleWidgetDragEnd() {
+            if (dragTarget) {
+                dragTarget.style.zIndex = '';
+                dragTarget.style.cursor = dragMode ? 'grab' : '';
+                dragTarget = null;
+                autoSave();
+            }
+        }
+
+        // ━━━ WIDGETS ━━━
+        window.insertWidget = (type) => {
+            const id = 'w_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            const wCount = document.querySelectorAll('.widget-embed').length;
+            const cols = 2;
+            const row = Math.floor(wCount / cols);
+            const col = wCount % cols;
+            const top = 20 + (row * 150);
+            const right = 20 + (col * 240);
+            let html = '';
+            const wrapStart = `<div class="widget-embed" contenteditable="false" data-widget="${type}" data-wid="${id}" style="position:absolute; right:${right}px; top:${top}px; user-select:none; z-index:10; margin:8px 0 8px 12px;">`;
+            const wrapEnd = `</div>`;
+
+            switch (type) {
+                case 'timer':
+                    html = `${wrapStart}
+                        <div class="we-title" data-name="Timer">Timer</div>
+                        <div class="we-row"><span class="we-timer-display" id="td_${id}">00:00:00</span></div>
+                        <div class="we-row" style="margin-top:6px;flex-wrap:wrap;gap:4px;">
+                            <button onclick="timerSet('${id}')">Set</button>
+                            <button onclick="timerPlay('${id}')">Play</button>
+                            <button onclick="timerPause('${id}')">Pause</button>
+                            <button onclick="timerReset('${id}')">Reset</button>
+                            <button onclick="timerStop('${id}')">Stop Sound</button>
+                        </div>
+                    ${wrapEnd}`;
+                    break;
+                case 'todo':
+                    html = `${wrapStart}
+                        <div class="we-title" data-name="Todo">Todo List</div>
+                        <div id="tl_${id}"></div>
+                        <button onclick="todoAdd('${id}')" style="margin-top:6px;">+ Add</button>
+                    ${wrapEnd}`;
+                    break;
+                case 'counter':
+                    html = `${wrapStart}
+                        <div class="we-title" data-name="Counter">Counter</div>
+                        <div class="we-row">
+                            <button onclick="counterChange('${id}',-1)">-</button>
+                            <span class="we-counter-val" id="cv_${id}">0</span>
+                            <button onclick="counterChange('${id}',1)">+</button>
+                        </div>
+                    ${wrapEnd}`;
+                    break;
+                case 'habit':
+                    html = `${wrapStart}
+                        <div class="we-title" data-name="Habit">Habit Tracker</div>
+                        <div class="we-habit-grid" id="hg_${id}">
+                            ${DAYS.map((d, i) => `<div class="we-habit-day" onclick="habitToggle('${id}',${i})" data-day="${i}">${d}</div>`).join('')}
+                        </div>
+                        <div class="we-row" style="margin-top:4px;font-size:0.7rem;color:var(--faint);">
+                            <span id="hs_${id}">0/7</span> days
+                        </div>
+                    ${wrapEnd}`;
+                    break;
+                case 'dice':
+                    html = `${wrapStart}
+                        <div class="we-title" data-name="Dice">Dice</div>
+                        <div class="we-row" style="gap:6px;">
+                            <span class="we-dice-face" id="df_${id}">?</span>
+                        </div>
+                        <div class="we-row" style="margin-top:6px;flex-wrap:wrap;gap:4px;">
+                            <label style="font-size:0.7rem;color:var(--faint);">Min</label>
+                            <input type="number" id="dmin_${id}" value="1" min="0" max="999" onchange="this.setAttribute('value', this.value); autoSave()" style="width:45px;padding:2px 4px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;font-size:0.8rem;">
+                            <label style="font-size:0.7rem;color:var(--faint);">Max</label>
+                            <input type="number" id="dmax_${id}" value="6" min="0" max="999" onchange="this.setAttribute('value', this.value); autoSave()" style="width:45px;padding:2px 4px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;font-size:0.8rem;">
+                            <button onclick="rollDice('${id}')">Roll!</button>
+                        </div>
+                    ${wrapEnd}`;
+                    break;
+            }
+
+            editorContent.focus();
+            editorContent.insertAdjacentHTML('beforeend', html);
+            autoSave();
+        };
+
+        // ━━━ TIMER — FIXED ━━━
+        const timers = {};
+
+        window.timerSet = async (id) => {
+            const val = await AppModal.prompt('Set timer (HH:MM:SS):', '00:05:00');
+            if (!val) return;
+            const parts = val.split(':').map(Number);
+            const secs = (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+            if (secs <= 0) { notify('Enter a time greater than 0'); return; }
+            // Clear any existing interval first
+            if (timers[id]?.interval) clearInterval(timers[id].interval);
+            timers[id] = { total: secs, remaining: secs, interval: null };
+            updateTimerDisplay(id);
+            autoSave();
+            // Do NOT auto-start
+        };
+
+        window.timerPlay = (id) => {
+            if (!timers[id]) { notify('Set a time first'); return; }
+            if (timers[id].interval) return; // Already running
+            if (timers[id].remaining <= 0) { notify('Timer finished — reset first'); return; }
+            timers[id].interval = setInterval(() => {
+                timers[id].remaining--;
+                updateTimerDisplay(id);
+                if (timers[id].remaining <= 0) {
+                    timers[id].remaining = 0;
+                    updateTimerDisplay(id);
+                    clearInterval(timers[id].interval);
+                    timers[id].interval = null;
+                    startAlarm();
+                    autoSave();
+                    notify('Timer finished!');
+                }
+            }, 1000);
+            autoSave();
+        };
+
+        window.timerPause = (id) => {
+            if (timers[id]?.interval) { clearInterval(timers[id].interval); timers[id].interval = null; autoSave(); }
+        };
+
+        window.timerReset = (id) => {
+            if (timers[id]?.interval) clearInterval(timers[id].interval);
+            if (timers[id]) { timers[id].remaining = timers[id].total; timers[id].interval = null; }
+            else timers[id] = { total: 0, remaining: 0, interval: null };
+            stopAlarm();
+            updateTimerDisplay(id);
+            autoSave();
+        };
+
+        window.timerStop = () => { stopAlarm(); };
+
+        function updateTimerDisplay(id) {
+            const el = document.getElementById('td_' + id);
+            if (!el || !timers[id]) return;
+            const s = Math.max(0, timers[id].remaining);
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+            el.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        // ━━━ ALARM — Fixed: stops after 10 sec or on click ━━━
+        function startAlarm() {
+            stopAlarm(); // Clear any existing
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                let count = 0;
+                const maxBeeps = 15; // ~10 seconds worth of beeps
+                activeAlarm = setInterval(() => {
+                    if (count >= maxBeeps) { stopAlarm(); return; }
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = count % 2 === 0 ? 880 : 660;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.35);
+                    count++;
+                }, 650);
+            } catch (e) { }
+        }
+
+        function stopAlarm() {
+            if (activeAlarm) { clearInterval(activeAlarm); activeAlarm = null; }
+        }
+
+        // ━━━ TODO ━━━
+        window.todoAdd = (id) => {
+            const list = document.getElementById('tl_' + id);
+            if (!list) return;
+            const item = document.createElement('div');
+            item.style.cssText = 'display:flex;align-items:center;gap:6px;margin:4px 0;';
+            item.innerHTML = `<input type="checkbox" onchange="todoCheck(this);autoSave()" style="accent-color:var(--amber);width:16px;height:16px;cursor:pointer;"><input type="text" value="" placeholder="Task..." style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:0.8rem;font-family:var(--font);outline:none;" oninput="autoSave()"><button onclick="this.parentElement.remove();autoSave()" style="font-size:0.7rem;">x</button>`;
+            list.appendChild(item);
+            autoSave();
+        };
+
+        window.todoCheck = (cb) => {
+            if (cb.checked) cb.setAttribute('checked', 'checked'); else cb.removeAttribute('checked');
+            const textInput = cb.parentElement.querySelector('input[type="text"]');
+            if (textInput) {
+                textInput.style.textDecoration = cb.checked ? 'line-through' : 'none';
+                textInput.style.opacity = cb.checked ? '0.5' : '1';
+            }
+        };
+
+        // ━━━ COUNTER ━━━
+        window.counterChange = (id, delta) => {
+            const el = document.getElementById('cv_' + id);
+            if (!el) return;
+            el.textContent = parseInt(el.textContent || '0') + delta;
+            el.style.transform = 'scale(1.3)';
+            setTimeout(() => el.style.transform = 'scale(1)', 150);
+            autoSave();
+        };
+
+        // ━━━ HABIT TRACKER ━━━
+        window.habitToggle = (id, day) => {
+            const grid = document.getElementById('hg_' + id);
+            if (!grid) return;
+            const d = grid.querySelector(`[data-day="${day}"]`);
+            if (d) {
+                d.classList.toggle('checked');
+                // Update count
+                const checked = grid.querySelectorAll('.checked').length;
+                const stat = document.getElementById('hs_' + id);
+                if (stat) stat.textContent = `${checked}/7`;
+            }
+            autoSave();
+        };
+
+        // ━━━ DICE — with min/max and animation ━━━
+        window.rollDice = (id) => {
+            const el = document.getElementById('df_' + id);
+            const minEl = document.getElementById('dmin_' + id);
+            const maxEl = document.getElementById('dmax_' + id);
+            if (!el) return;
+            const min = parseInt(minEl?.value || '1');
+            const max = parseInt(maxEl?.value || '6');
+            if (min > max) { notify('Min must be <= Max'); return; }
+            let rolls = 0;
+            el.style.transition = 'transform 0.08s';
+            const anim = setInterval(() => {
+                const val = Math.floor(Math.random() * (max - min + 1)) + min;
+                el.textContent = val;
+                el.style.transform = `rotate(${(Math.random() - 0.5) * 30}deg) scale(${1 + Math.random() * 0.3})`;
+                rolls++;
+                if (rolls > 12) {
+                    clearInterval(anim);
+                    const final = Math.floor(Math.random() * (max - min + 1)) + min;
+                    el.textContent = final;
+                    el.style.transform = 'rotate(0deg) scale(1.2)';
+                    setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+                }
+            }, 70);
+        };
+
+        // ━━━ WIDGET CONTEXT MENU ━━━
+        window.renameWidget = async () => {
+            if (!ctxWidget) return;
+            const titleEl = ctxWidget.querySelector('.we-title');
+            const name = await AppModal.prompt('Widget name:', titleEl?.getAttribute('data-name') || titleEl?.textContent || 'Widget');
+            if (name && titleEl) { titleEl.textContent = name; titleEl.setAttribute('data-name', name); autoSave(); }
+        }
+        function recolorWidget() {
+            if (!ctxWidget) return;
+            const picker = document.createElement('input');
+            picker.type = 'color';
+            let bg = ctxWidget.style.borderColor || '#f59e0b';
+            if (bg.startsWith('rgb')) {
+                const m = bg.match(/\d+/g);
+                if (m) bg = '#' + m.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+            }
+            picker.value = bg.length === 7 ? bg : '#f59e0b';
+            picker.onchange = () => {
+                const color = picker.value;
+                ctxWidget.style.borderColor = color;
+                const title = ctxWidget.querySelector('.we-title');
+                if (title) title.style.color = color;
+                autoSave();
+            };
+            picker.click();
+        }
+        function deleteWidget() {
+            if (!ctxWidget) return;
+            ctxWidget.remove();
+            ctxWidget = null;
+            autoSave();
+        }
+
+        // ━━━ EXPORT / IMPORT ━━━
+        function exportNote() {
+            save();
+            const data = { type: 'moltennotes-note', version: 1, note: { ...note } };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `MoltenNote_${note.title || 'Untitled'}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            document.getElementById('fileDropdown').classList.add('hidden');
+            notify('Note exported!');
+        }
+
+        function importNote(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                try {
+                    const json = JSON.parse(ev.target.result);
+                    if (json.type !== 'moltennotes-note' || !json.note) { notify('Invalid file'); return; }
+                    if (!await AppModal.confirm('This will replace the current note. Continue?')) return;
+                    Object.assign(note, json.note);
+                    note.modified = Date.now();
+                    titleInput.value = note.title || '';
+                    editorContent.innerHTML = note.content || '';
+                    save();
+                    notify('Note imported!');
+                } catch { notify('Import failed'); }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        // ━━━ REATTACH LISTENERS ━━━
+        function reattachWidgetListeners() {
+            // Re-attach event listeners for todo checkboxes
+            document.querySelectorAll('.widget-embed[data-widget="todo"] input[type="checkbox"]').forEach(cb => {
+                cb.onchange = () => { todoCheck(cb); autoSave(); };
+            });
+        }
+
+        editorContent.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                const href = e.target.getAttribute('href');
+                if (href && href.startsWith('note:n_')) {
+                    e.preventDefault();
+                    if (dragMode) return;
+                    const targetId = href.split('note:n_')[1];
+                    if (targetId) {
+                        try { autoSave(); } catch (err) { }
+                        window.location.href = 'editor.html?id=' + targetId;
+                    }
+                }
+            }
+        });
+
+        // ━━━ STORAGE ━━━
+        function getStore() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { notes: [], categories: [] }; } catch { return { notes: [], categories: [] }; } }
+
+        function save() {
+            const store = getStore();
+            const idx = store.notes.findIndex(n => n.id === note.id);
+            note.content = editorContent.innerHTML;
+            note.modified = Date.now();
+            if (idx !== -1) store.notes[idx] = note;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+            document.getElementById('autoSaveLabel').textContent = 'Saved';
+        }
+
+        function autoSave() {
+            document.getElementById('autoSaveLabel').textContent = 'Saving...';
+            if (saveTimer) clearTimeout(saveTimer);
+            saveTimer = setTimeout(save, 800);
+        }
+
+        function notify(msg) {
+            const n = document.createElement('div');
+            n.className = 'notification'; n.textContent = msg;
+            document.body.appendChild(n);
+            requestAnimationFrame(() => n.classList.add('show'));
+            setTimeout(() => { n.classList.remove('show'); setTimeout(() => n.remove(), 300); }, 2500);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

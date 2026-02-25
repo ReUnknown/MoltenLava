@@ -15,50 +15,38 @@
 </head>
 
 <body>
+    <div class="ambient-glow slides-glow" style="display:none;"></div>
+    <div class="ambient-glow slides-glow right" style="display:none;"></div>
 
-    <div class="app-container">
-
-        <header style="margin-bottom: 3rem; position: relative;" class="scroll-reveal">
-            <div class="hero-bg-glow" style="top: 0; transform: translate(-50%, -20%); opacity: 0.5;"></div>
-
-            <div
-                style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-subtle); padding-bottom: 2rem;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                        <path
-                            d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z"
-                            fill="#FF5E3A" />
-                    </svg>
-                    <div style="font-size: 1.8rem; line-height: 1;">
-                        <span style="font-weight: 800; color: #fff;">Molten</span><span
-                            style="font-weight: 200; color: #e4e4e7;">Slides</span>
-                    </div>
-                </div>
-                <a href="../suite.html" class="btn btn-secondary glow-target"
-                    style="padding: 0.5rem 1rem; font-size: 0.85rem;">&larr; Back to Suite</a>
-            </div>
-
-            <div style="margin-top: 3rem;" class="scroll-reveal delay-1">
-                <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">Your Workspace.</h1>
-                <p style="font-size: 1.1rem; color: var(--text-muted); max-width: 600px;">
-                    Select an existing presentation to continue forging, or start a new blank deck.
-                </p>
-            </div>
-        </header>
-
-        <section class="scroll-reveal delay-2"
-            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="position: relative; width: 100%; max-width: 400px;">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search presentations...">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text-muted)"
-                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7;">
+    <div class="slides-hub-shell">
+        <div class="slides-hub-header">
+            <div class="slides-hub-brand">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+                    style="filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));">
                     <path
-                        d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        d="M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2ZM12 20C10.5 20 9 18 9 16C9 14.5 11 13 12 11C13 13 15 14.5 15 16C15 18 13.5 20 12 20Z"
+                        fill="var(--accent-blue)" />
                 </svg>
+                <div class="slides-hub-title">Molten<span>Slides</span></div>
             </div>
-        </section>
 
-        <div class="grid-gallery" id="slidesGrid"></div>
+            <div class="slides-hub-actions">
+                <a href="../index.html" class="btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                    </svg>
+                    Suite
+                </a>
+                <button class="btn-secondary" id="importBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
+                    </svg>
+                    Import JSON
+                </button>
+            </div>
+        </div>
+
+        <div class="slides-hub-grid" id="slidesGrid"></div>
     </div>
 
     <div id="modalOverlay" class="modal-overlay hidden">

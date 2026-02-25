@@ -489,9 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function deleteDeck() {
+    async function deleteDeck() {
         try {
-            if (confirm("Delete this deck? This cannot be undone.")) {
+            if (await AppModal.confirm("Delete this deck? This cannot be undone.", "Delete Deck")) {
                 allDecks = allDecks.filter(d => d.id != deckId);
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(allDecks));
                 setTimeout(() => {
@@ -507,13 +507,13 @@ document.addEventListener('DOMContentLoaded', () => {
     jsonInput.onchange = (e) => {
         if (e.target.files[0]) {
             const reader = new FileReader();
-            reader.onload = (ev) => {
+            reader.onload = async (ev) => {
                 try {
                     const data = JSON.parse(ev.target.result);
 
                     // Cross-app detection: check if this is a MoltenDocs file
                     if (data.type === 'moltendocs' || (data.content && !data.pages)) {
-                        if (confirm('This looks like a MoltenDocs document file. Did you mean to import it in MoltenDocs instead?')) {
+                        if (await AppModal.confirm('This looks like a MoltenDocs document file. Did you mean to import it in MoltenDocs instead?', 'Import Notice')) {
                             // Import into MoltenDocs
                             const DOCS_KEY = 'lavaDocs_v1';
                             let allDocsData = [];
@@ -897,13 +897,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function deleteSlidePage(index) {
+    async function deleteSlidePage(index) {
         try {
             if (currentDeck.pages.length <= 1) {
                 showNotification('Cannot delete last slide', 'error');
                 return;
             }
-            if (!confirm(`Delete slide ${index + 1}?`)) return;
+            if (!(await AppModal.confirm(`Delete slide ${index + 1}?`, "Delete Slide"))) return;
 
             currentDeck.pages.splice(index, 1);
             if (activePageIndex >= currentDeck.pages.length) {

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MoltenDraw Hub — View and manage your drawings.">
+    <title>MoltenDraw</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff5e3a' d='M12 2C12 2 4 8 4 14C4 18.4 7.6 22 12 22C16.4 22 20 18.4 20 14C20 8 12 2 12 2Z'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="ambient-glow draw-glow"></div>
+    <div class="ambient-glow draw-glow right"></div>
+    <div class="draw-hub-shell">
+        <div class="draw-hub-header">
+            <div class="draw-hub-brand">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                        fill="#06b6d4" />
+                </svg>
+                <div class="draw-hub-title">
+                    Molten<span>Draw</span>
+                    <span class="draw-hub-badge">MOBILE & DESKTOP</span>
+                </div>
+            </div>
+            <div class="draw-hub-actions">
+                <a href="../index.html" class="btn-secondary">&larr; Suite</a>
+                <button class="btn-primary" id="newDrawBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    New Drawing
+                </button>
+            </div>
+        </div>
+
+        <div class="draw-hub-grid" id="drawGrid"></div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay hidden" id="modalOverlay" onclick="closeModals()"></div>
+    <div class="modal hidden" id="deleteModal"
+        style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:12px;padding:24px;z-index:600;min-width:300px;text-align:center;">
+        <h3 style="margin-bottom:8px;">Delete Drawing?</h3>
+        <p style="color:var(--text-faint);font-size:0.85rem;margin-bottom:16px;" id="deleteTargetName"></p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+            <button class="btn-primary" style="background:#ef4444;" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'moltenDraw_v1';
+        const grid = document.getElementById('drawGrid');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const deleteModal = document.getElementById('deleteModal');
+        let activeDeleteId = null;
+
+        function getProjects() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+            catch (e) { return []; }
+        }
+
+        function saveProjects(projects) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        }
+
+        function render() {
+            const projects = getProjects();
+            grid.innerHTML = '';
+
+            if (projects.length === 0) {
+                grid.innerHTML = `<div class="draw-empty">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="var(--text-faint)">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    <h3>No drawings yet</h3>
+                    <p>Click "New Drawing" to get started!</p>
+                </div>`;
+                return;
+            }
+
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'draw-card';
+                card.onclick = (e) => {
+                    if (e.target.closest('.draw-card-menu')) return;
+                    window.location.href = `editor.html?id=${p.id}`;
+                };
+
+                card.innerHTML = `
+                    <div class="draw-card-preview">
+                        ${p.thumbnail ? `<img src="${p.thumbnail}" alt="Preview">` : `<svg width="40" height="40" viewBox="0 0 24 24" fill="var(--text-faint)"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>`}
+                    </div>
+                    <div class="draw-card-info">
+                        <div class="draw-card-title">${p.title || 'Untitled'}</div>
+                        <div class="draw-card-meta">${p.date || ''} · ${p.layerCount || 1} layer${(p.layerCount || 1) !== 1 ? 's' : ''}</div>
+                    </div>
+                    <button class="draw-card-menu" onclick="event.stopPropagation(); triggerDelete(${p.id}, '${(p.title || 'Untitled').replace(/'/g, "\\'")}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('newDrawBtn').onclick = () => {
+            const newId = Date.now();
+            const projects = getProjects();
+            projects.unshift({ id: newId, title: 'Untitled Drawing', date: new Date().toLocaleDateString(), thumbnail: null, layerCount: 1 });
+            saveProjects(projects);
+            window.location.href = `editor.html?id=${newId}`;
+        };
+
+        function triggerDelete(id, title) {
+            activeDeleteId = id;
+            document.getElementById('deleteTargetName').textContent = title;
+            modalOverlay.classList.remove('hidden');
+            deleteModal.classList.remove('hidden');
+        }
+
+        window.closeModals = () => {
+            modalOverlay.classList.add('hidden');
+            deleteModal.classList.add('hidden');
+            activeDeleteId = null;
+        };
+
+        document.getElementById('confirmDeleteBtn').onclick = () => {
+            if (activeDeleteId !== null) {
+                const projects = getProjects().filter(p => p.id !== activeDeleteId);
+                saveProjects(projects);
+                render();
+            }
+            closeModals();
+        };
+
+        render();
+    </script>
+</body>
+
+</html>

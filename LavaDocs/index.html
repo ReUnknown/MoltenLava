@@ -13,6 +13,8 @@
 </head>
 
 <body>
+    <div class="ambient-glow docs-glow"></div>
+    <div class="ambient-glow docs-glow right"></div>
     <div class="app-container">
         <header class="hub-header scroll-reveal">
             <div class="hub-brand">
@@ -27,7 +29,7 @@
                 </div>
             </div>
             <div class="hub-actions">
-                <a href="../suite.html" class="btn btn-secondary"
+                <a href="../index.html" class="btn btn-secondary"
                     style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">&larr; Suite</a>
             </div>
         </header>
@@ -79,8 +81,14 @@
             const STORAGE_KEY = 'lavaDocs_v1';
             let activeDeleteId = null, activeRenameId = null;
 
-            function safeLoad() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { return []; } }
+            function safeLoad() {
+                try {
+                    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                    return Array.isArray(data) ? data : [];
+                } catch (e) { return []; }
+            }
             let docs = safeLoad();
+            if (!Array.isArray(docs)) docs = [];
             const container = document.getElementById('docsContainer');
             const searchInput = document.getElementById('searchInput');
             const modalOverlay = document.getElementById('modalOverlay');
@@ -103,6 +111,7 @@
                     <h3>${filter ? 'No documents found' : 'No documents yet'}</h3>
                     <p>${filter ? 'Try different search terms' : 'Click "New Document" to get started!'}</p>
                 </div>`;
+                    initAnimations();
                     return;
                 }
 
@@ -166,6 +175,10 @@
                 if (hubObs) hubObs.disconnect();
                 hubObs = new IntersectionObserver((entries, obs) => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }); }, { threshold: 0.1 });
                 document.querySelectorAll('.scroll-reveal').forEach(el => hubObs.observe(el));
+                // Fallback: ensure everything is visible after 300ms for new users
+                setTimeout(() => {
+                    document.querySelectorAll('.scroll-reveal').forEach(el => el.classList.add('visible'));
+                }, 300);
             }
 
             if (searchInput) searchInput.addEventListener('input', e => render(e.target.value));

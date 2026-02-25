@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LavaPlayground - Advanced AI Interaction Environment">
+    <title>LavaPlayground</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ef4444' d='M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z'/></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+
+<body class="pg-body">
+
+    <!-- Navbar -->
+    <header class="pg-navbar">
+        <div class="pg-nav-left">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444">
+                <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z" />
+            </svg>
+            <h1>LavaPlayground</h1>
+        </div>
+        <div class="pg-nav-right">
+            <button class="btn btn-outline" onclick="openKeySettings()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;">
+                    <path
+                        d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
+                </svg>
+                Dev Keys
+            </button>
+            <a href="../index.html" class="btn btn-outline">&larr; Suite</a>
+        </div>
+    </header>
+
+    <div class="pg-layout">
+
+        <!-- Left Sidebar: History -->
+        <aside class="pg-sidebar pg-sidebar-left">
+            <div class="sidebar-header">
+                <h2>Sessions</h2>
+                <button class="btn btn-primary btn-sm" onclick="createNewChat()">+</button>
+            </div>
+            <div class="session-list" id="sessionList">
+                <!-- Session items listed here -->
+            </div>
+
+            <div class="analytics-panel">
+                <h3>Global Analytics</h3>
+                <div class="stat-row">
+                    <span>Total Tokens</span>
+                    <strong id="globalTokens">0</strong>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Chat Viewport -->
+        <main class="pg-main">
+            <div class="chat-viewport" id="chatViewport">
+                <!-- Messages go here -->
+            </div>
+
+            <div class="chat-input-area">
+                <textarea id="promptInput" rows="3" placeholder="Enter user message... (Shift+Enter for newline)"
+                    onkeydown="handleEnter(event)"></textarea>
+                <div class="input-actions">
+                    <span class="token-count-live" id="liveTokenCount">Tokens: 0</span>
+                    <button class="btn btn-primary" id="btnSend" onclick="sendMessage()">Submit Request</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Configuration -->
+        <aside class="pg-sidebar pg-sidebar-right">
+            <div class="sidebar-header">
+                <h2>Configuration</h2>
+            </div>
+            <div class="config-scroll">
+
+                <div class="config-group">
+                    <label>Model Engine</label>
+                    <select id="modelSelect" class="config-input" onchange="saveConfig()">
+                        <option value="openai/gpt-oss-120b">GPT OSS 120b</option>
+                        <option value="x-ai/grok-4.1-fast">Grok 4.1 Fast</option>
+                        <option value="anthropic/claude-sonnet-4.6">Claude Sonnet 4.6</option>
+                        <option value="custom">Custom ID...</option>
+                    </select>
+                    <input type="text" id="customModelId" class="config-input hidden" placeholder="Enter model ID"
+                        style="margin-top: 8px;" oninput="saveConfig()">
+                </div>
+
+                <div class="config-group">
+                    <label>System Instructions</label>
+                    <textarea id="systemPrompt" class="config-input" rows="5"
+                        placeholder="You are a helpful assistant..." oninput="saveConfig()"></textarea>
+                </div>
+
+                <div class="config-group">
+                    <div class="slider-label">
+                        <label>Temperature</label>
+                        <span id="tempVal">0.7</span>
+                    </div>
+                    <input type="range" id="tempSlider" class="config-slider" min="0" max="2" step="0.1" value="0.7"
+                        oninput="document.getElementById('tempVal').innerText=this.value; saveConfig()">
+                </div>
+
+                <div class="config-group">
+                    <div class="slider-label">
+                        <label>Top P</label>
+                        <span id="topPVal">1.0</span>
+                    </div>
+                    <input type="range" id="topPSlider" class="config-slider" min="0.1" max="1" step="0.05" value="1.0"
+                        oninput="document.getElementById('topPVal').innerText=this.value; saveConfig()">
+                </div>
+
+                <div class="config-group" style="padding-top: 2rem;">
+                    <button class="btn btn-danger" style="width:100%" onclick="clearCurrentChat()">Clear
+                        Conversation</button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script src="../shared_modal.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
