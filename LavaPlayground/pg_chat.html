@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LavaPlayground - Fast, configurable, multi-model AI chats">
+    <title>LavaPlayground — Chat</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23c084fc' d='M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L5.4 7.86l6.6 3.71 6.6-3.71L12 4.15zM4.5 9.1v6.52l6.5 3.66v-6.52L4.5 9.1zm15 6.52V9.1l-6.5 3.66v6.52l6.5-3.66z'/></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- DOMPurify for sanitizing marked output -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+
+<body class="chat-body">
+    <!-- Header -->
+    <header class="chat-header">
+        <div class="chat-header-left">
+            <a href="index.html" class="back-btn" title="Back to Hub">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                </svg>
+            </a>
+            <input type="text" id="chatTitleInput" class="chat-title-input" value="Untitled Chat" autocomplete="off"
+                oninput="saveCurrentChat()">
+        </div>
+
+        <div class="chat-header-center">
+            <div class="model-selector-wrap">
+                <select id="modelPresetSelect" class="model-select" onchange="handleModelChange()">
+                    <option value="openai/gpt-oss-120b" selected>GPT OSS 120b</option>
+                    <option value="x-ai/grok-4.1-fast">Grok 4.1 Fast</option>
+                    <option value="anthropic/claude-sonnet-4.6">Claude Sonnet 4.6</option>
+                    <option value="google/gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                    <option value="custom">Custom ID...</option>
+                </select>
+                <!-- Rendered hidden if preset selected, shown if Custom chosen -->
+                <input type="text" id="customModelInput" class="custom-model-input hidden"
+                    placeholder="Enter OpenRouter Model ID" onchange="saveCurrentChat()">
+            </div>
+
+            <!-- Plugin Engine Entry -->
+            <div class="plugin-selector-wrap">
+                <button class="btn btn-outline" id="btnPlugins" onclick="openPluginModal()"
+                    style="padding:6px 12px; font-size:0.85rem; border-color:var(--border);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                        style="color:var(--brand-alt); margin-right:4px;">
+                        <path
+                            d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5-1.1 0-2.1.4-2.9 1l-6-6-2.8 2.8 5.4 5.4c-.6.8-1 1.9-1 3 0 2.5 2 4.5 4.5 4.5.9 0 1.7-.3 2.4-.7l4.1 4.1 2.8-2.8-2.7-2.7zM12.5 18c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z" />
+                    </svg>
+                    Plugins
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-header-right">
+            <button class="icon-toggle-btn" id="devModeToggle" onclick="toggleDevMode()" title="Toggle Developer Stats">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6C15.6,13.98,13.98,15.6,12,15.6z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Plugin Manager Modal -->
+    <div id="pluginManagerOverlay" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="margin:0;">Plugin Engine</h2>
+                <button class="btn-outline" onclick="closePluginModal()"
+                    style="border:none; background:transparent; font-size:1.2rem; cursor:pointer; color:var(--muted);">&times;</button>
+            </div>
+
+            <!-- Plugin: Memory Compression -->
+            <div class="plugin-card"
+                style="border:1px solid var(--border); border-radius:12px; padding:1rem; margin-bottom:1rem; background:rgba(6,182,212,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="font-size:1.1rem; color:#06b6d4;">Memory Compression</h3>
+                        <p style="font-size:0.8rem; color:var(--muted); max-width:280px;">Automatically summarizes old
+                            messages to save tokens and prevent forgetting.</p>
+                    </div>
+                    <label class="switch" style="position:relative; display:inline-block; width:44px; height:24px;">
+                        <input type="checkbox" id="pluginMemoryCompress" style="opacity:0; width:0; height:0;">
+                        <span class="slider round"
+                            style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--border); transition:.4s; border-radius:24px;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Plugin: PersonalityManager -->
+            <div class="plugin-card"
+                style="border:1px solid var(--border); border-radius:12px; padding:1rem; margin-bottom:1rem; background:rgba(192,132,252,0.05);">
+                <h3 style="font-size:1.1rem; color:#c084fc;">PersonalityManager</h3>
+                <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Dictates the AI's core baseline
+                    identity and tone.</p>
+                <select id="pluginPersonality"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:6px; font-family:var(--font);">
+                    <option value="default">Standard Assistant</option>
+                    <option value="fun">Fun & Playful</option>
+                    <option value="happy">Overly Happy & Excited</option>
+                    <option value="sad">Depressed & Sad</option>
+                    <option value="intelligent">Hyper-Intelligent & Analytical</option>
+                    <option value="professional">Strictly Professional & Corporate</option>
+                    <option value="informative">Deeply Informative Lecturer</option>
+                    <option value="detailed">Extremely Detailed Explainer</option>
+                    <option value="custom">Create Custom Preset...</option>
+                </select>
+            </div>
+
+            <!-- Plugin: Formato -->
+            <div class="plugin-card"
+                style="border:1px solid var(--border); border-radius:12px; padding:1rem; margin-bottom:1rem; background:rgba(245,158,11,0.05);">
+                <h3 style="font-size:1.1rem; color:#f59e0b;">Formato Layer</h3>
+                <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px;">Forces the AI into a strict
+                    structural layout mapping.</p>
+                <select id="pluginFormato"
+                    style="width:100%; padding:8px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:6px; font-family:var(--font);">
+                    <option value="none">No Forced Formatting</option>
+                    <option value="json">Strict JSON Objects Only</option>
+                    <option value="code">Code Blocks Only (No conversational filler)</option>
+                    <option value="bulletpoints">Bullet Point Lists</option>
+                    <option value="markdown">Heavy Markdown Headers & Tables</option>
+                </select>
+            </div>
+
+            <div class="modal-actions" style="margin-top:1.5rem; border-top:none; padding-top:0;">
+                <button class="btn btn-primary" onclick="savePlugins()">Save Core Architecture</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat View Area -->
+    <main class="chat-viewport" id="chatViewport">
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages inserted here via JS -->
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <div class="chat-input-container">
+        <!-- Attachment Previews -->
+        <div id="attachmentPreviews" class="attachment-previews hidden"></div>
+
+        <div class="chat-input-wrapper">
+            <button class="btn-attach" onclick="document.getElementById('fileUpload').click()" title="Attach Images">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-1.93-1.57-3.5-3.5-3.5S8 3.07 8 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z" />
+                </svg>
+            </button>
+            <input type="file" id="fileUpload" class="hidden" multiple accept="image/*"
+                onchange="handleFileUpload(event)">
+
+            <textarea id="promptInput" class="prompt-input" rows="1" placeholder="Type a message..."
+                oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+
+            <button class="btn-send" id="btnSend" onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+        <div class="chat-footer-info">Tokens are estimated locally. AI can make mistakes. Check important info.</div>
+    </div>
+
+    <script src="../shared_modal.js"></script>
+    <script src="pg_chat.js"></script>
+</body>
+
+</html>
